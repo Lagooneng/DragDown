@@ -3,7 +3,7 @@
 
 #include "Player/DDPlayerState.h"
 #include "AbilitySystemComponent.h"
-#include "Player/DDPlayerState.h"
+#include "Attribute/DDAttributeSet.h"
 
 ADDPlayerState::ADDPlayerState()
 {

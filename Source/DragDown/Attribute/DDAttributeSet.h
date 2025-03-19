@@ -24,11 +24,11 @@ class DRAGDOWN_API UDDAttributeSet : public UAttributeSet
 public:
 	UDDAttributeSet();
 
-	ATTRIBUTE_ACCESSORS(UCSAttributeSet, Stamina);
-	ATTRIBUTE_ACCESSORS(UCSAttributeSet, MaxStamina); 
+	ATTRIBUTE_ACCESSORS(UDDAttributeSet, Stamina);
+	ATTRIBUTE_ACCESSORS(UDDAttributeSet, MaxStamina); 
 
 	// Meta Attribute
-	ATTRIBUTE_ACCESSORS(UCSAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS(UDDAttributeSet, Damage);
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	//virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
