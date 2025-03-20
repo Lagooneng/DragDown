@@ -55,15 +55,20 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		ShoulderLookAction = InputActionShoulderLookRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
+	if (CharacterMeshRef.Object)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
+	if (AnimInstanceClassRef.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+	}
+
 	// ASC
 	ASC = nullptr;
-
-	// Trigger
-	Trigger = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger"));
-	Trigger->InitCapsuleSize(50.f, 100.0f);
-	Trigger->SetCollisionProfileName(CPROFILE_OVERLAPALL);
-	Trigger->SetupAttachment(GetCapsuleComponent());
-	Trigger->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 }
 
 UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const
@@ -88,18 +93,6 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping); 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'")); 
-	if (CharacterMeshRef.Object) 
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object); 
-	}
-
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
-	if (AnimInstanceClassRef.Class) 
-	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class); 
-	}
 
 	SetupGASInputComponent();
 }
@@ -152,11 +145,6 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 
 		//추가 gas 액션
 		//EnhancedInputComponent->BindAction(~Action, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 인덱스);
-
-		if (ASC)
-		{
-			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Ability.Movement")));
-		}
 
 		UE_LOG(LogDD, Log, TEXT("SetupGASInputComponent Succeed"));
 	}

@@ -86,9 +86,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = GAS)
 	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
-
-// Trigger Section
-protected:
-	UPROPERTY()
-	TObjectPtr<class UCapsuleComponent> Trigger;
 };
