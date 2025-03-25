@@ -37,6 +37,15 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		MappingContext = InputMappingContextRef.Object;
 	}
 
+	// Capsule
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_DDCAPSULE);
+
+	// Mesh
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Jump.IA_Jump'"));
 	if (nullptr != InputActionJumpRef.Object)
 	{
@@ -61,7 +70,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/ABP_Person.ABP_Person_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
