@@ -64,13 +64,19 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		ShoulderLookAction = InputActionShoulderLookRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPushingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Pushing.IA_Pushing'"));
+	if (nullptr != InputActionPushingRef.Object)
+	{
+		PushingAction = InputActionPushingRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
 	if (CharacterMeshRef.Object)
 	{
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/ABP_Person.ABP_Person_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/ABP_Manny.ABP_Manny_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
@@ -153,7 +159,8 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
 		//추가 gas 액션
-		//EnhancedInputComponent->BindAction(~Action, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 인덱스);
+		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 1);
+		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::GASInputReleased, 1);
 
 		UE_LOG(LogDD, Log, TEXT("SetupGASInputComponent Succeed"));
 	}
@@ -169,11 +176,9 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 
 void ADDCharacterPlayer::GASInputPressed(int32 InputId)
 {
-	if (HasAuthority())
-	{
-		HandleGASInputPressed(InputId);
-	}
-	else
+	HandleGASInputPressed(InputId);
+
+	if( !HasAuthority() )
 	{
 		ServerGASInputPressed(InputId);
 	}
@@ -198,7 +203,6 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 	if (Spec)
 	{
 		if (Spec->InputPressed) return;
-		//UE_LOG(LogCS, Log, TEXT("[NetMode : %d], HandleGASInputPressed"), GetWorld()->GetNetMode());
 		Spec->InputPressed = true;
 		if (Spec->IsActive())
 		{
@@ -206,18 +210,16 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 		}
 		else
 		{
-			ASC->TryActivateAbility(Spec->Handle);
+			ASC->TryActivateAbility(Spec->Handle, true);
 		}
 	}
 }
 
 void ADDCharacterPlayer::GASInputReleased(int32 InputId)
 {
-	if (HasAuthority())
-	{
-		HandleGASInputReleased(InputId);
-	}
-	else
+	HandleGASInputReleased(InputId);
+
+	if (!HasAuthority())
 	{
 		ServerGASInputReleased(InputId);
 	}
