@@ -95,12 +95,6 @@ void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
 
 void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	//FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect);
-	//if (EffectSpecHandle.IsValid())
-	//{
-	//	//UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback - EffectSpecHandle Is Valid"));
-	//	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
-	//}
 	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
 
 	bool bReplicatedEndAbility = true;
