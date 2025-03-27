@@ -37,6 +37,15 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		MappingContext = InputMappingContextRef.Object;
 	}
 
+	// Capsule
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_DDCAPSULE);
+
+	// Mesh
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Jump.IA_Jump'"));
 	if (nullptr != InputActionJumpRef.Object)
 	{
@@ -55,15 +64,26 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		ShoulderLookAction = InputActionShoulderLookRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPushingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Pushing.IA_Pushing'"));
+	if (nullptr != InputActionPushingRef.Object)
+	{
+		PushingAction = InputActionPushingRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
+	if (CharacterMeshRef.Object)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/ABP_Manny.ABP_Manny_C"));
+	if (AnimInstanceClassRef.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+	}
+
 	// ASC
 	ASC = nullptr;
-
-	// Trigger
-	Trigger = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger"));
-	Trigger->InitCapsuleSize(50.f, 100.0f);
-	Trigger->SetCollisionProfileName(CPROFILE_OVERLAPALL);
-	Trigger->SetupAttachment(GetCapsuleComponent());
-	Trigger->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 }
 
 UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const
@@ -88,18 +108,6 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping); 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'")); 
-	if (CharacterMeshRef.Object) 
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object); 
-	}
-
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
-	if (AnimInstanceClassRef.Class) 
-	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class); 
-	}
 
 	SetupGASInputComponent();
 }
@@ -151,12 +159,8 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
 		//추가 gas 액션
-		//EnhancedInputComponent->BindAction(~Action, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 인덱스);
-
-		if (ASC)
-		{
-			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Ability.Movement")));
-		}
+		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 1);
+		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::GASInputReleased, 1);
 
 		UE_LOG(LogDD, Log, TEXT("SetupGASInputComponent Succeed"));
 	}
@@ -172,11 +176,9 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 
 void ADDCharacterPlayer::GASInputPressed(int32 InputId)
 {
-	if (HasAuthority())
-	{
-		HandleGASInputPressed(InputId);
-	}
-	else
+	HandleGASInputPressed(InputId);
+
+	if( !HasAuthority() )
 	{
 		ServerGASInputPressed(InputId);
 	}
@@ -201,7 +203,6 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 	if (Spec)
 	{
 		if (Spec->InputPressed) return;
-		//UE_LOG(LogCS, Log, TEXT("[NetMode : %d], HandleGASInputPressed"), GetWorld()->GetNetMode());
 		Spec->InputPressed = true;
 		if (Spec->IsActive())
 		{
@@ -209,18 +210,16 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 		}
 		else
 		{
-			ASC->TryActivateAbility(Spec->Handle);
+			ASC->TryActivateAbility(Spec->Handle, true);
 		}
 	}
 }
 
 void ADDCharacterPlayer::GASInputReleased(int32 InputId)
 {
-	if (HasAuthority())
-	{
-		HandleGASInputReleased(InputId);
-	}
-	else
+	HandleGASInputReleased(InputId);
+
+	if (!HasAuthority())
 	{
 		ServerGASInputReleased(InputId);
 	}

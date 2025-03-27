@@ -53,6 +53,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderLookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PushingAction;
+
 	// ASC Section
 protected:
 	void SetupGASInputComponent();
@@ -86,9 +89,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = GAS)
 	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
-
-// Trigger Section
-protected:
-	UPROPERTY()
-	TObjectPtr<class UCapsuleComponent> Trigger;
 };
