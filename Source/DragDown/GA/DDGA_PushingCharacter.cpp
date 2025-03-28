@@ -10,6 +10,8 @@
 #include "GA/TA/DDTA_MultiTrace.h"
 #include "Misc/DateTime.h"
 #include "DragDown.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameFramework/Character.h"
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
@@ -52,6 +54,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
 	}
 
+	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 
 	// Montage task
 	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
@@ -96,6 +99,26 @@ void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
 void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
 	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
+
+	int32 Idx = 0;
+	while ( UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, Idx) )
+	{
+		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, Idx);
+
+		ACharacter* Character = Cast<ACharacter>(HitResult.GetActor());
+		if (Character)
+		{
+			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
+			float LaunchStrength = 1000.0f; // 밀어내는 세기 (원하는 대로 조정)
+
+			FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+			Character->LaunchCharacter(LaunchVelocity, true, true);
+		}
+
+		UE_LOG(LogDD, Log, TEXT("HitResult : %s"), *HitResult.GetActor()->GetName());
+
+		++Idx;
+	}
 
 	bool bReplicatedEndAbility = true;
 	bool bWasCancelled = false;

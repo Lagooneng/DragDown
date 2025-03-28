@@ -31,4 +31,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ability")
 	UAnimMontage* PushingMontage;
+
+	UPROPERTY()
+	TObjectPtr<ACharacter> AvatarCharacter;
 };
