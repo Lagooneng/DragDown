@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/DDCollision.h"
+#include "ActorComponent/DDAttackStateComponent.h"
 
 // Sets default values
 ADDCharacterBase::ADDCharacterBase()
@@ -24,5 +25,8 @@ ADDCharacterBase::ADDCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+
+	// Attack State 관리, NPC가 사용 가능하니 Base에 설정
+	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
 }
 
