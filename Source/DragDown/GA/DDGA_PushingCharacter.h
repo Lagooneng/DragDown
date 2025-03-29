@@ -31,6 +31,11 @@ private:
 	UFUNCTION()
 	void OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
+	void ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ValidatePush(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Ability")
 	UAnimMontage* PushingMontage;
 

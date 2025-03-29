@@ -101,8 +101,30 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 	if (bIsTraced) return;
 	bIsTraced = true;
 
+	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
+	if (ASC)
+	{
+		FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
+		ProcessPush(TargetDataHandle);
+	}
+	else
+	{
+		ProcessPush(TargetDataHandle);
+	}
+
+	// 클라이언트: 서버 검증 요청
+	if (!AvatarCharacter->HasAuthority())
+	{
+		Server_ValidatePush(TargetDataHandle);
+	}
+
+	AttackStateComponent->PlusAttackState(); 
+}
+
+void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
 	int32 Idx = 0;
-	while ( UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, Idx) )
+	while (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, Idx))
 	{
 		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, Idx);
 
@@ -125,6 +147,24 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 
 		++Idx;
 	}
-	
-	AttackStateComponent->PlusAttackState(); 
+}
+
+void UDDGA_PushingCharacter::Server_ValidatePush_Implementation(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
+	if (ASC)
+	{
+		FScopedPredictionWindow ScopedPrediction(ASC, false);
+		ProcessPush(TargetDataHandle);
+	}
+	else
+	{
+		ProcessPush(TargetDataHandle);
+	}
+}
+
+bool UDDGA_PushingCharacter::Server_ValidatePush_Validate(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	// 필요한 검증 조건 구현 (스테미나 검증 등)
+	return true;
 }
