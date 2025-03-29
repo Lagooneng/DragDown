@@ -36,6 +36,8 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	
+	bIsTraced = false;
+
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 	if ( AvatarCharacter )
 	{
@@ -49,7 +51,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FName SectionName(*SectionString);
 
 	// Montage task
-	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 		this,
 		NAME_None,
 		PushingMontage,     // UAnimMontage* 타입
@@ -62,7 +64,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	MontageTask->ReadyForActivation();
 
 	// Wait task
-	UAbilityTask_WaitGameplayEvent* EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this,
 		FGameplayTag::RequestGameplayTag(FName("Event.PushTrigger"))
 	);
@@ -105,12 +107,27 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 	int32 Idx = 0;
 	while (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, Idx))
 	{
-		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, Idx);
+		ACharacter* Character = nullptr;
 
-		ACharacter* Character = Cast<ACharacter>(HitResult.GetActor());
+		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, Idx);
+		if (HitResult.GetActor())
+		{
+			Character = Cast<ACharacter>(HitResult.GetActor());
+		}
+		
 		if (Character)
 		{
-			if (AttackStateComponent == nullptr) return;
+			if ( AttackStateComponent == nullptr )
+			{
+				UE_LOG(LogDD, Log, TEXT("UDDGA_PushingCharacter::ProcessPush - No AttackStateComponent"));
+				return;
+			}
+
+			if ( AvatarCharacter == nullptr )
+			{
+				UE_LOG(LogDD, Log, TEXT("UDDGA_PushingCharacter::ProcessPush - No AvatarCharacter"));
+				return;
+			}
 
 			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
 
@@ -133,5 +150,8 @@ void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle,
 
 	bIsTraced = false;
 
-	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	if ( AvatarCharacter )
+	{
+		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
 }

@@ -33,8 +33,15 @@ private:
 
 	void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Ability")
-	UAnimMontage* PushingMontage;
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> PushingMontage;
+
+	UPROPERTY()
+	TObjectPtr < class UAbilityTask_PlayMontageAndWait > MontageTask;
+
+	UPROPERTY()
+	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;
+
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
