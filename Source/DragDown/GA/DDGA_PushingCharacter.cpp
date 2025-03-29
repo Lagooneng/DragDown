@@ -25,8 +25,6 @@ UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 	{
 		PushingMontage = PushingMontageRef.Object;
 	}
-
-	bIsTraced = false;
 }
 
 void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -35,11 +33,8 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
+	
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
-
-	UE_LOG(LogDD, Log, TEXT("[NetMode : %d] ActivateAbility - %s"), GetWorld()->GetNetMode(), *AvatarCharacter->GetName());
-
 	if ( AvatarCharacter )
 	{
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
@@ -74,16 +69,10 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	EventTask->ReadyForActivation();
 }
 
-void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-	bIsTraced = false;
-	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-}
-
 void UDDGA_PushingCharacter::OnMontageCompleted()
 {
-	//UE_LOG(LogDD, Log, TEXT("[NetMode %d] OnMontageCompleted"), GetWorld()->GetNetMode());
+	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
 	bool bReplicatedEndAbility = true;
 	bool bWasCancelled = false;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
@@ -98,8 +87,7 @@ void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
 
 void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	if (bIsTraced) return;
-	bIsTraced = true;
+	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
 
 	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (ASC)
@@ -136,14 +124,12 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
 
 			FVector LaunchVelocity = LaunchDirection * AttackStateComponent->GetPower();
-			LaunchVelocity.Z = 0.0f;
 			LaunchVelocity.Z += AttackStateComponent->GetZPower();
-
-			UE_LOG(LogDD, Log, TEXT("[NetMode : %d] OnTraceResultCallback : %f, %f, %f"), GetWorld()->GetNetMode(),
-				LaunchVelocity.X, LaunchVelocity.Y, LaunchVelocity.Z);
 
 			Character->LaunchCharacter(LaunchVelocity, true, true);
 		}
+
+		UE_LOG(LogDD, Log, TEXT("HitResult : %s"), *HitResult.GetActor()->GetName());
 
 		++Idx;
 	}
