@@ -25,6 +25,8 @@ UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 	{
 		PushingMontage = PushingMontageRef.Object;
 	}
+
+	bIsTraced = false;
 }
 
 void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -71,8 +73,6 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 void UDDGA_PushingCharacter::OnMontageCompleted()
 {
-	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-
 	bool bReplicatedEndAbility = true;
 	bool bWasCancelled = false;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
@@ -87,6 +87,8 @@ void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
 
 void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
+	if (bIsTraced) return;
+	bIsTraced = true;
 	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
 
 	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
@@ -94,19 +96,8 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 	{
 		FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 		ProcessPush(TargetDataHandle);
+		AttackStateComponent->PlusAttackState();
 	}
-	else
-	{
-		ProcessPush(TargetDataHandle);
-	}
-
-	// 클라이언트: 서버 검증 요청
-	if (!AvatarCharacter->HasAuthority())
-	{
-		Server_ValidatePush(TargetDataHandle);
-	}
-
-	AttackStateComponent->PlusAttackState(); 
 }
 
 void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
@@ -124,6 +115,7 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
 
 			FVector LaunchVelocity = LaunchDirection * AttackStateComponent->GetPower();
+			LaunchVelocity.Z = 0.0f;
 			LaunchVelocity.Z += AttackStateComponent->GetZPower();
 
 			Character->LaunchCharacter(LaunchVelocity, true, true);
@@ -135,22 +127,11 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 	}
 }
 
-void UDDGA_PushingCharacter::Server_ValidatePush_Implementation(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
-	if (ASC)
-	{
-		FScopedPredictionWindow ScopedPrediction(ASC, false);
-		ProcessPush(TargetDataHandle);
-	}
-	else
-	{
-		ProcessPush(TargetDataHandle);
-	}
-}
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-bool UDDGA_PushingCharacter::Server_ValidatePush_Validate(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
-{
-	// 필요한 검증 조건 구현 (스테미나 검증 등)
-	return true;
+	bIsTraced = false;
+
+	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }

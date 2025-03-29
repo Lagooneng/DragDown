@@ -31,8 +31,7 @@ private:
 
 	void ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_ValidatePush(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+	void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ability")
 	UAnimMontage* PushingMontage;
@@ -42,4 +41,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
+
+	bool bIsTraced;
 };
