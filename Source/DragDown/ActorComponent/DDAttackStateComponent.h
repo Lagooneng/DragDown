@@ -18,7 +18,6 @@ public:
 	FORCEINLINE int8 GetAttackState() { return NowAttackState; }
 	FORCEINLINE void PlusAttackState() { 
 		NowAttackState = (NowAttackState + 1) % MaxAttackState;
-		UE_LOG(LogTemp, Log, TEXT("PlusAttackState - %d, %d"), NowAttackState, MaxAttackState);
 	}
 
 	FString GetSectionPrefix();
