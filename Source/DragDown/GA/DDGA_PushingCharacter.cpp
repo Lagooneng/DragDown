@@ -12,6 +12,8 @@
 #include "DragDown.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
+#include "ActorComponent/DDAttackStateComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
@@ -32,29 +34,17 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	
-	if (ActivationInfo.GetActivationPredictionKey().IsValidKey())
-	{
-		FDateTime Now = FDateTime::Now();
-		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
-			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
-			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
-
-		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Client-side(%s) prediction running"),
-			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
-	}
-
-	if (HasAuthority(&ActivationInfo))
-	{
-		FDateTime Now = FDateTime::Now();
-		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
-			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
-			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
-
-		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Server-side(%s) authority running"),
-			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
-	}
-
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
+	if ( AvatarCharacter )
+	{
+		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+		AttackStateComponent = AvatarCharacter->GetComponentByClass<UDDAttackStateComponent>();
+	}
+
+	if (AttackStateComponent == nullptr) return;
+
+	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
+	FName SectionName(*SectionString);
 
 	// Montage task
 	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
@@ -62,7 +52,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		NAME_None,
 		PushingMontage,     // UAnimMontage* 타입
 		1.0f,               // 플레이 속도
-		FName(TEXT("ComboAttack1")),          // Start Section
+		SectionName,          // Start Section
 		false               // Stop when ability ends
 	);
 
@@ -77,13 +67,12 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_PushingCharacter::OnPushingEventReceived);
 	EventTask->ReadyForActivation();
-
-	// Target & Damage
-
 }
 
 void UDDGA_PushingCharacter::OnMontageCompleted()
 {
+	AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
 	bool bReplicatedEndAbility = true;
 	bool bWasCancelled = false;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
@@ -108,10 +97,13 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 		ACharacter* Character = Cast<ACharacter>(HitResult.GetActor());
 		if (Character)
 		{
-			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
-			float LaunchStrength = 1000.0f; // 밀어내는 세기 (원하는 대로 조정)
+			if (AttackStateComponent == nullptr) return;
 
-			FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
+
+			FVector LaunchVelocity = LaunchDirection * AttackStateComponent->GetPower();
+			LaunchVelocity.Z += AttackStateComponent->GetZPower();
+
 			Character->LaunchCharacter(LaunchVelocity, true, true);
 		}
 
@@ -119,8 +111,6 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 
 		++Idx;
 	}
-
-	bool bReplicatedEndAbility = true;
-	bool bWasCancelled = false;
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
+	
+	AttackStateComponent->PlusAttackState(); 
 }

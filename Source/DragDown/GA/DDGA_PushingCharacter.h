@@ -34,4 +34,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
+
+	UPROPERTY()
+	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 };

@@ -13,4 +13,7 @@ class DRAGDOWN_API ADDCharacterBase : public ACharacter
 
 public:
 	ADDCharacterBase();
+
+protected:
+	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 };
