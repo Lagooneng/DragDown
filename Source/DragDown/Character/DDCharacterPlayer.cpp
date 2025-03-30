@@ -70,12 +70,6 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		PushingAction = InputActionPushingRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionGaurdRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Gaurd.IA_Gaurd'")); 
-	if (nullptr != InputActionGaurdRef.Object)
-	{
-		GaurdAction = InputActionGaurdRef.Object;
-	}
-
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
 	if (CharacterMeshRef.Object)
 	{
@@ -114,7 +108,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping); 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
-	
+
 	SetupGASInputComponent();
 }
 
@@ -165,10 +159,8 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
 		//추가 gas 액션
-		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::GASInputPressed, 1);
+		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 1);
 		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::GASInputReleased, 1);
-		EnhancedInputComponent->BindAction(GaurdAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::GASInputPressed, 2);
-		EnhancedInputComponent->BindAction(GaurdAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::GASInputReleased, 2);
 
 		UE_LOG(LogDD, Log, TEXT("SetupGASInputComponent Succeed"));
 	}
@@ -210,8 +202,8 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 	FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromInputID(InputId);
 	if (Spec)
 	{
-		/*if (Spec->InputPressed) return;
-		Spec->InputPressed = true;*/
+		if (Spec->InputPressed) return;
+		Spec->InputPressed = true;
 		if (Spec->IsActive())
 		{
 			ASC->AbilitySpecInputPressed(*Spec);
@@ -243,7 +235,7 @@ void ADDCharacterPlayer::HandleGASInputReleased(int32 InputId)
 	FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromInputID(InputId);
 	if (Spec)
 	{
-		//Spec->InputPressed = false;
+		Spec->InputPressed = false;
 		if (Spec->IsActive())
 		{
 			ASC->AbilitySpecInputReleased(*Spec);
