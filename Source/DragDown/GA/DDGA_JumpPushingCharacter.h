@@ -21,9 +21,6 @@ public:
 
 private:
 	UFUNCTION()
-	void OnMontageCompleted();
-
-	UFUNCTION()
 	void OnPushingEventReceived(FGameplayEventData Payload);
 
 	UFUNCTION()
@@ -37,9 +34,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> PushingMontage;
-
-	UPROPERTY()
-	TObjectPtr < class UAbilityTask_PlayMontageAndWait > MontageTask;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;

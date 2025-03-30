@@ -14,6 +14,9 @@ class DRAGDOWN_API ADDCharacterBase : public ACharacter
 public:
 	ADDCharacterBase();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastPlayAnimMontage(UAnimMontage* Montage, FName SectionName);
+
 protected:
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 };

@@ -30,3 +30,12 @@ ADDCharacterBase::ADDCharacterBase()
 	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
 }
 
+void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* Montage, FName SectionName) 
+{
+	if ( GetMesh() && GetMesh()->GetAnimInstance() )
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
+	}
+}
+

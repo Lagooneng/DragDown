@@ -15,6 +15,7 @@
 #include "ActorComponent/DDAttackStateComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GA/DDGA_JumpPushingCharacter.h"
+#include "Character/DDCharacterBase.h"
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
@@ -64,18 +65,16 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
 	FName SectionName(*SectionString);
 
-	// Montage task
-	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-		this,
-		NAME_None,
-		PushingMontage,     // UAnimMontage* 타입
-		1.0f,               // 플레이 속도
-		SectionName,          // Start Section
-		false               // Stop when ability ends
-	);
-
-	MontageTask->OnCompleted.AddDynamic(this, &UDDGA_PushingCharacter::OnMontageCompleted);
-	MontageTask->ReadyForActivation();
+	ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
+	if (Character)
+	{
+		UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
+		if (true)
+		{
+			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
+			Character->NetMulticastPlayAnimMontage(PushingMontage, SectionName);
+		}
+	}
 
 	// Wait task
 	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
@@ -85,13 +84,6 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_PushingCharacter::OnPushingEventReceived);
 	EventTask->ReadyForActivation();
-}
-
-void UDDGA_PushingCharacter::OnMontageCompleted()
-{
-	bool bReplicatedEndAbility = true;
-	bool bWasCancelled = false;
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
 }
 
 void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
@@ -105,7 +97,7 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 {
 	if (bIsTraced) return;
 	bIsTraced = true;
-	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
+	UE_LOG(LogDD, Log, TEXT("[NetMode : %d] OnTraceResultCallback"), GetWorld()->GetNetMode());
 
 	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (ASC)
@@ -114,6 +106,10 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 		ProcessPush(TargetDataHandle);
 		AttackStateComponent->PlusAttackState();
 	}
+
+	bool bReplicatedEndAbility = true; 
+	bool bWasCancelled = false; 
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled); 
 }
 
 void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
@@ -160,23 +156,18 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 
 void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
 	bIsTraced = false;
 
 	if ( AvatarCharacter )
 	{
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UDDGA_PushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
 {
-	if ( MontageTask && MontageTask->IsActive() )
-	{
-		MontageTask->EndTask();
-	}
-
 	if ( EventTask && EventTask->IsActive() )
 	{
 		EventTask->EndTask();

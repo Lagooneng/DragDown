@@ -20,6 +20,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 {
 	bReplicates = true;
 
+	NetPriority = 10.0f;
+
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -270,6 +272,8 @@ void ADDCharacterPlayer::SetGASAbilities()
 {
 	if (ASC)
 	{
+		const int32 HighPriority = 10;
+
 		for (const auto& StartAbility : StartAbilities)
 		{
 			FGameplayAbilitySpec StartSpec(StartAbility);
