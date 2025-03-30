@@ -27,6 +27,8 @@ UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 	}
 
 	bIsTraced = false;
+	Power = 400.0f;
+	ZPower = 800.0f;
 }
 
 void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -36,11 +38,6 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 	bIsTraced = false;
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
-	/*if (AvatarCharacter)
-	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	}*/
-
 
 	// Montage task
 	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
@@ -57,7 +54,7 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 
 	if (AvatarCharacter) 
 	{
-		AvatarCharacter->LaunchCharacter(FVector(0.0f, 0.0f, 500.0f), false, true); 
+		AvatarCharacter->LaunchCharacter(FVector(0.0f, 0.0f, 300.0f), false, true); 
 	}
 
 	// Wait task
@@ -125,8 +122,6 @@ void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHan
 			}
 
 			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
-			float Power = 2000.0f;
-			float ZPower = 500.0f;
 			FVector LaunchVelocity = LaunchDirection * Power;
 			LaunchVelocity.Z = 0.0f;
 			LaunchVelocity.Z += ZPower;
@@ -145,9 +140,22 @@ void UDDGA_JumpPushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Han
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
 	bIsTraced = false;
+}
 
-	if (AvatarCharacter)
+void UDDGA_JumpPushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
+{
+	if (MontageTask && MontageTask->IsActive())
 	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		MontageTask->EndTask();
 	}
+
+	if (EventTask && EventTask->IsActive())
+	{
+		EventTask->EndTask();
+	}
+
+	// for Local Prediction Role Back
+	bIsTraced = false;
+
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
 }

@@ -169,3 +169,26 @@ void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle,
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	}
 }
+
+void UDDGA_PushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
+{
+	if ( MontageTask && MontageTask->IsActive() )
+	{
+		MontageTask->EndTask();
+	}
+
+	if ( EventTask && EventTask->IsActive() )
+	{
+		EventTask->EndTask();
+	}
+
+	// for Local Prediction Role Back
+	if (AvatarCharacter)
+	{
+		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+
+	bIsTraced = false;
+
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
+}

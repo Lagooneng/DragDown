@@ -33,6 +33,8 @@ private:
 
 	void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
+	void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel) override;
+
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> PushingMontage;
 
@@ -45,6 +47,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
+
+	float Power;
+	float ZPower;
 
 	bool bIsTraced;
 };
