@@ -44,7 +44,7 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 	if (Character)
 	{
 		UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
-		if (true)
+		if (ASC)
 		{
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 			Character->NetMulticastPlayAnimMontage(PushingMontage, FName("Start"));

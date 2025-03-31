@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GA/DDGA_PushingCharacter.h"
@@ -38,6 +38,28 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	
+	if (ActivationInfo.GetActivationPredictionKey().IsValidKey())
+	{
+		FDateTime Now = FDateTime::Now();
+		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
+			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
+			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
+
+		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Client-side(%s) prediction running"),
+			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
+	}
+
+	if (HasAuthority(&ActivationInfo))
+	{
+		FDateTime Now = FDateTime::Now();
+		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
+			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
+			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
+
+		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Server-side(%s) authority running"),
+			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
+	}
+
 	bIsTraced = false;
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
@@ -65,11 +87,15 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
 	FName SectionName(*SectionString);
 
+	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
+	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
+	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
+	// 본인은 Local Prediction을 통해 지연 완화
 	ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
 	if (Character)
 	{
 		UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
-		if (true)
+		if (ASC)
 		{
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 			Character->NetMulticastPlayAnimMontage(PushingMontage, SectionName);
@@ -139,7 +165,7 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 				return;
 			}
 
-			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // ���� �ٶ󺸴� ����
+			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
 
 			FVector LaunchVelocity = LaunchDirection * AttackStateComponent->GetPower();
 			LaunchVelocity.Z = 0.0f;
