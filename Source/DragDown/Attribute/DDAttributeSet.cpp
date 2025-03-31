@@ -34,6 +34,7 @@ void UDDAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 	{
 		SetStamina(FMath::Clamp(GetStamina() - GetDamage(), MinimumStamina, GetMaxStamina()));
 		UE_LOG(LogDD, Log, TEXT("[NetMode : %d] Damage Detected : %f | Now Energy : %f"), GetWorld()->GetNetMode(), GetDamage(), GetStamina());
+		SetDamage(0.0f);
 	}
 }
 

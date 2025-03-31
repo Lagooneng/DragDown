@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "DDGA_PushingCharacter.generated.h"
+#include "DDGA_JumpPushingCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DRAGDOWN_API UDDGA_PushingCharacter : public UGameplayAbility
+class DRAGDOWN_API UDDGA_JumpPushingCharacter : public UGameplayAbility
 {
 	GENERATED_BODY()
 	
 public:
-	UDDGA_PushingCharacter();
+	UDDGA_JumpPushingCharacter();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -42,8 +42,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
 
-	UPROPERTY()
-	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
+	float Power;
+	float ZPower;
 
 	bool bIsTraced;
 };

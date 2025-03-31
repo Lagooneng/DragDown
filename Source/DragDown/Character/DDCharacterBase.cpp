@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/DDCollision.h"
 #include "ActorComponent/DDAttackStateComponent.h"
+#include "DragDown.h"
 
 // Sets default values
 ADDCharacterBase::ADDCharacterBase()
@@ -28,5 +29,16 @@ ADDCharacterBase::ADDCharacterBase()
 
 	// Attack State 관리, NPC가 사용 가능하니 Base에 설정
 	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
+}
+
+void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* Montage, FName SectionName) 
+{
+	//if (IsLocallyControlled()) return;
+	UE_LOG(LogDD, Display, TEXT("[NetMode : %d] NetMulticastPlayAnimMontage_Implementation"), GetWorld()->GetNetMode());
+	if ( GetMesh() && GetMesh()->GetAnimInstance() )
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
+	}
 }
 
