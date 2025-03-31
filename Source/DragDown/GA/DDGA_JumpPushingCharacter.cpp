@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GA/DDGA_JumpPushingCharacter.h"
@@ -40,6 +40,10 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 
+	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
+	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
+	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
+	// 본인은 Local Prediction을 통해 지연 완화
 	ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
 	if (Character)
 	{
@@ -117,7 +121,7 @@ void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHan
 				return;
 			}
 
-			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // ���� �ٶ󺸴� ����
+			FVector LaunchDirection = AvatarCharacter->GetController()->GetControlRotation().Vector(); // 내가 바라보는 방향
 			FVector LaunchVelocity = LaunchDirection * Power;
 			LaunchVelocity.Z = 0.0f;
 			LaunchVelocity.Z += ZPower;
