@@ -38,7 +38,10 @@ void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* 
 	if ( GetMesh() && GetMesh()->GetAnimInstance() )
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f);
-		GetMesh()->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
+		if (!SectionName.IsNone()) 
+		{
+			GetMesh()->GetAnimInstance()->Montage_JumpToSection(SectionName, Montage);
+		}
 	}
 }
 

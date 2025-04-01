@@ -115,6 +115,15 @@ void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHan
 
 		if (Character)
 		{
+			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
+
+			if (TargetASC && TargetASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge"))))
+			{
+				UE_LOG(LogDD, Log, TEXT("Character %s is dodging - skipping LaunchCharacter"), *Character->GetName());
+				++Idx;
+				continue;
+			}
+
 			if (AvatarCharacter == nullptr)
 			{
 				UE_LOG(LogDD, Log, TEXT("UDDGA_PushingCharacter::ProcessPush - No AvatarCharacter"));
