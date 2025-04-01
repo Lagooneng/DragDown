@@ -24,6 +24,8 @@ UDDGA_Dodge::UDDGA_Dodge()
 	}
 
 	bIsDodged = false;
+
+	ActivationBlockedTags.AddTag( FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
 
 void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -79,6 +81,7 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		if (ASC)
 		{
 			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge")));
+			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 			Character->NetMulticastPlayAnimMontage(DodgeMontage, FName());
@@ -121,6 +124,12 @@ void UDDGA_Dodge::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGam
 	if (AvatarCharacter)
 	{
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); 
+	}
+
+
+	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+	{
+		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 	}
 
 	bIsDodged = false;
