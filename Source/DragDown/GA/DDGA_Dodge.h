@@ -36,5 +36,5 @@ private:
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
 
-	bool bIsTraced;
+	bool bIsDodged;
 };

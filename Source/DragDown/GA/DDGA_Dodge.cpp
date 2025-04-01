@@ -23,7 +23,7 @@ UDDGA_Dodge::UDDGA_Dodge()
 		DodgeMontage = DodgeMontageRef.Object;
 	}
 
-	bIsTraced = false;
+	bIsDodged = false;
 }
 
 void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -52,7 +52,7 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
 	}
 
-	bIsTraced = false;
+	bIsDodged = false;
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 	if (AvatarCharacter)
@@ -123,7 +123,7 @@ void UDDGA_Dodge::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGam
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); 
 	}
 
-	bIsTraced = false; 
+	bIsDodged = false;
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled); 
 }
@@ -141,7 +141,7 @@ void UDDGA_Dodge::CancelAbility(const FGameplayAbilitySpecHandle Handle, const F
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	}
 
-	bIsTraced = false;
+	bIsDodged = false;
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
 }
