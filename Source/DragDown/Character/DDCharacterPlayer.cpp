@@ -72,6 +72,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		PushingAction = InputActionPushingRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionDodgeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Dodge.IA_Dodge'"));
+	if (nullptr != InputActionDodgeRef.Object)
+	{
+		DodgeAction = InputActionDodgeRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
 	if (CharacterMeshRef.Object)
 	{
@@ -163,6 +169,9 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 		//추가 gas 액션
 		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 1);
 		EnhancedInputComponent->BindAction(PushingAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::GASInputReleased, 1);
+
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::GASInputPressed, 2);
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::GASInputReleased, 2);
 
 		UE_LOG(LogDD, Log, TEXT("SetupGASInputComponent Succeed"));
 	}
