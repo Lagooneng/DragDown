@@ -272,13 +272,13 @@ bool UDDGA_PushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle
 	return true;
 }
 
-void UDDGA_PushingCharacter::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UDDGA_PushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	Super::OnGiveAbility(ActorInfo, Spec);
+	Super::OnAvatarSet(ActorInfo, Spec);
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 
-	if ( AvatarCharacter )
+	if (AvatarCharacter)
 	{
 		AttackStateComponent = AvatarCharacter->GetComponentByClass<UDDAttackStateComponent>();
 	}

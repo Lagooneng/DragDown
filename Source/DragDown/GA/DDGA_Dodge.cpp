@@ -193,9 +193,9 @@ bool UDDGA_Dodge::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, co
 	return true;
 }
 
-void UDDGA_Dodge::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UDDGA_Dodge::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	Super::OnGiveAbility(ActorInfo, Spec);
+	Super::OnAvatarSet(ActorInfo, Spec);
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 }

@@ -213,9 +213,9 @@ bool UDDGA_JumpPushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHa
 	return true; 
 }
 
-void UDDGA_JumpPushingCharacter::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+void UDDGA_JumpPushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
-	Super::OnGiveAbility(ActorInfo, Spec);
+	Super::OnAvatarSet(ActorInfo, Spec);
 
 	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 }
