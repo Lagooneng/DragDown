@@ -29,6 +29,8 @@ UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 	}
 
 	bIsTraced = false;
+
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
 
 void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -82,7 +84,18 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		AttackStateComponent = AvatarCharacter->GetComponentByClass<UDDAttackStateComponent>();
 	}
 
-	if (AttackStateComponent == nullptr) return;
+	if (AttackStateComponent == nullptr)
+	{
+		bool bReplicatedEndAbility = true;
+		bool bWasCancelled = false;
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+		return;
+	}
+
+	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+	{
+		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+	}
 
 	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
 	FName SectionName(*SectionString);
@@ -192,6 +205,11 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	bIsTraced = false;
+
+	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+	{
+		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+	}
 
 	if ( AvatarCharacter )
 	{
