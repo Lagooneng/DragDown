@@ -10,19 +10,9 @@ ADDPlayerController::ADDPlayerController()
 {
 }
 
-void ADDPlayerController::BeginPlay()
+void ADDPlayerController::BeginPlayingState()
 {
-	Super::BeginPlay();
-
-	if (IsLocalController())
-	{
-		InitGASWidget();
-	}
-}
-
-void ADDPlayerController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
+	Super::BeginPlayingState();
 
 	if (IsLocalController())
 	{
