@@ -24,6 +24,7 @@ public:
 	FString GetSectionPrefix();
 	float GetPower();
 	float GetZPower();
+	float GetNecessaryStamina();
 
 private:
 	UPROPERTY()

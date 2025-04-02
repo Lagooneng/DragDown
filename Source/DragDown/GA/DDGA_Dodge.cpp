@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/DDCharacterBase.h"
 #include "Misc/DateTime.h"
+#include "Attribute/DDAttributeSet.h"
 
 UDDGA_Dodge::UDDGA_Dodge()
 {
@@ -23,7 +24,15 @@ UDDGA_Dodge::UDDGA_Dodge()
 		DodgeMontage = DodgeMontageRef.Object;
 	}
 
+	static ConstructorHelpers::FClassFinder<UGameplayEffect> DownStaminaEffectRef(TEXT("/Game/Blueprint/GA/GE/BPGE_DownStamina.BPGE_DownStamina_C"));
+	if (DownStaminaEffectRef.Succeeded())
+	{
+		DownStaminaEffect = DownStaminaEffectRef.Class;
+	}
+
 	bIsDodged = false;
+
+	NecessaryStamina = 10.0f;
 
 	ActivationBlockedTags.AddTag( FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
@@ -56,7 +65,6 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	bIsDodged = false;
 
-	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 	if (AvatarCharacter)
 	{
 		if (AvatarCharacter->GetCharacterMovement()->IsFalling())
@@ -82,6 +90,13 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		{
 			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge")));
 			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+
+			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
+			if (EffectSpecHandle.IsValid())
+			{
+				EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), -NecessaryStamina);
+				ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
+			}
 
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 			Character->NetMulticastPlayAnimMontage(DodgeMontage, FName());
@@ -153,4 +168,34 @@ void UDDGA_Dodge::CancelAbility(const FGameplayAbilitySpecHandle Handle, const F
 	bIsDodged = false;
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
+}
+
+bool UDDGA_Dodge::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+	if (ASC == nullptr) return false;
+
+	const UDDAttributeSet* AttributeSet = ASC->GetSet<UDDAttributeSet>();
+	if (AttributeSet == nullptr) return false;
+
+	float CurrentStamina = AttributeSet->GetStamina();
+
+	if (CurrentStamina < NecessaryStamina)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void UDDGA_Dodge::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnGiveAbility(ActorInfo, Spec);
+
+	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 }

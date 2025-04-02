@@ -36,3 +36,9 @@ float UDDAttackStateComponent::GetZPower()
 	return 0.0f;
 }
 
+float UDDAttackStateComponent::GetNecessaryStamina()
+{
+	if (StateDrivenAttackData) return StateDrivenAttackData->NecessaryStamina[NowAttackState];
+	return 0.0f;
+}
+

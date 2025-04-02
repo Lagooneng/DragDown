@@ -28,7 +28,7 @@ void UDDAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 	if (Data.EvaluatedData.Attribute == GetStaminaAttribute())
 	{
 		SetStamina(FMath::Clamp(GetStamina(), MinimumStamina, GetMaxStamina()));
-		UE_LOG(LogDD, Warning, TEXT("Direct Health Access : %f"), GetStamina());
+		UE_LOG(LogDD, Log, TEXT("Direct Stamina Access : %f"), GetStamina());
 	}
 	else if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
