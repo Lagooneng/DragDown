@@ -3,10 +3,15 @@
 
 #include "ActorComponent/DDAttackStateComponent.h"
 #include "DataAsset/DDStateDrivenAttackData.h"
+#include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
+#include "DragDown.h"
 
 // Sets default values for this component's properties
 UDDAttackStateComponent::UDDAttackStateComponent()
 {
+	SetIsReplicatedByDefault(true);
+
 	NowAttackState = 0;
 
 	static ConstructorHelpers::FObjectFinder<UDDStateDrivenAttackData> DataAssetRef(TEXT("/Script/DragDown.DDStateDrivenAttackData'/Game/Blueprint/DataAsset/DDDA_DirevenAttackData.DDDA_DirevenAttackData'"));
@@ -16,6 +21,11 @@ UDDAttackStateComponent::UDDAttackStateComponent()
 		StateDrivenAttackData = DataAssetRef.Object;
 		MaxAttackState = DataAssetRef.Object.Get()->MaxStateCount;
 	}
+}
+
+void UDDAttackStateComponent::PlusAttackState()
+{
+	NowAttackState = (NowAttackState + 1) % MaxAttackState;
 }
 
 FString UDDAttackStateComponent::GetSectionPrefix()
@@ -38,7 +48,16 @@ float UDDAttackStateComponent::GetZPower()
 
 float UDDAttackStateComponent::GetNecessaryStamina()
 {
+	UE_LOG(LogDD, Log, TEXT("[NetMode : %d] NowAttackState : %d"), GetWorld()->GetNetMode(), NowAttackState);
+
 	if (StateDrivenAttackData) return StateDrivenAttackData->NecessaryStamina[NowAttackState];
 	return 0.0f;
+}
+
+void UDDAttackStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UDDAttackStateComponent, NowAttackState);
 }
 

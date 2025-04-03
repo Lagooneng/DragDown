@@ -16,10 +16,8 @@ public:
 	UDDAttackStateComponent();
 	
 	FORCEINLINE int8 GetAttackState() { return NowAttackState; }
-	FORCEINLINE void PlusAttackState() { 
-		NowAttackState = (NowAttackState + 1) % MaxAttackState;
-		UE_LOG(LogTemp, Log, TEXT("PlusAttackState - %d, %d"), NowAttackState, MaxAttackState);
-	}
+
+	void PlusAttackState();
 
 	FString GetSectionPrefix();
 	float GetPower();
@@ -27,9 +25,13 @@ public:
 	float GetNecessaryStamina();
 
 private:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY()
 	TObjectPtr < class UDDStateDrivenAttackData > StateDrivenAttackData;
 
+	UPROPERTY(Replicated)
 	int8 NowAttackState;
+
 	int8 MaxAttackState;
 };
