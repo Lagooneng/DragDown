@@ -15,7 +15,6 @@ class DRAGDOWN_API UDDBuffManagerComponent : public UActorComponent
 public:	
 	UDDBuffManagerComponent();
 
-protected:
 	void Initailize(class UAbilitySystemComponent* InASC);
 
 protected:

@@ -42,6 +42,7 @@ void ADDPlayerController::InitGASWidget()
         return;
     }
 
+	StaminaBarWidget->SetOwner(ControlledPawn);
     StaminaBarWidget->SetAbilitySystemComponent(ControlledPawn);
 
     

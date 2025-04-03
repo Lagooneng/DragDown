@@ -47,14 +47,18 @@ void UDDGASStaminaBarUserWidget::UpdateStaminaBar()
 {
 	if (PbStaminaBar)
 	{
-		UE_LOG(LogDD, Log, TEXT("UpdateEnergyBar : %f / %f"), CurrentStamina, CurrentMaxStamina); 
+		if ( !Owner->HasAuthority() )
+		{
+			UE_LOG(LogDD, Log, TEXT("[NetMode %d] UpdateEnergyBar : %f / %f"), GetWorld()->GetNetMode(), CurrentStamina, CurrentMaxStamina);
+
+		}
 		PbStaminaBar->SetPercent(CurrentStamina / CurrentMaxStamina);
 	}
 }
 
 void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
-	UE_LOG(LogDD, Log, TEXT("[NetMode %d]OnEnergyChanged"), GetWorld()->GetNetMode());
+	//UE_LOG(LogDD, Log, TEXT("[NetMode %d]OnEnergyChanged"), GetWorld()->GetNetMode());
 	CurrentStamina = ChangeData.NewValue;
 	UpdateStaminaBar();
 }
