@@ -27,7 +27,7 @@ void UDDGA_RegenStamina::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	UAbilityTask_WaitDelay* WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 0.1f);
+	WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
 	if (WaitTask)
 	{
 		WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);
@@ -37,12 +37,15 @@ void UDDGA_RegenStamina::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 void UDDGA_RegenStamina::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if ( WaitTask )
+	{
+		WaitTask->EndTask();
+	}
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UDDGA_RegenStamina::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
 {
-
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
 }
 
@@ -61,6 +64,17 @@ void UDDGA_RegenStamina::ApplyRegenEffect()
 		UE_LOG(LogDD, Warning, TEXT("UDDGA_RegenStamina - ApplyRegenEffect - No ASC"));
 		return;
 	}
+
+	if ( ASC->GetSet<UDDAttributeSet>() && ASC->GetSet<UDDAttributeSet>()->GetStamina() >= 100.0f)
+	{
+		WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
+		if (WaitTask)
+		{
+			WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);
+			WaitTask->ReadyForActivation();
+		}
+		return;
+	}
 	
 	if (RegenStaminaEffect == nullptr)
 	{
@@ -68,27 +82,21 @@ void UDDGA_RegenStamina::ApplyRegenEffect()
 		return;
 	}
 
+	if ( !AvatarCharacter->HasAuthority() )
+	{
+		UE_LOG(LogDD, Log, TEXT("ApplyRegenEffect"));
+	}
+
 	FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 
-	FGameplayEffectSpecHandle RegenStaminaEffectHandle = MakeOutgoingGameplayEffectSpec(RegenStaminaEffect);
-	ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, RegenStaminaEffectHandle);
-
-	if (!AvatarCharacter->HasAuthority() && ASC->GetSet<UDDAttributeSet>()->GetStamina() < 99.5f)
+	FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(RegenStaminaEffect);
+	if (EffectSpecHandle.IsValid())
 	{
-		UE_LOG(LogDD, Warning, TEXT("== APPLY ATTEMPT =="));
-		UE_LOG(LogDD, Warning, TEXT("IsLocallyControlled: %s"), AvatarCharacter->IsLocallyControlled() ? TEXT("YES") : TEXT("NO"));
-		UE_LOG(LogDD, Warning, TEXT("HasAuthority: %s"), AvatarCharacter->HasAuthority() ? TEXT("YES") : TEXT("NO"));
-		UE_LOG(LogDD, Warning, TEXT("PredictionKey Valid: %s"), ASC->ScopedPredictionKey.IsValidKey() ? TEXT("YES") : TEXT("NO"));
-		UE_LOG(LogDD, Warning, TEXT("EffectSpec Valid: %s"), RegenStaminaEffectHandle.IsValid() ? TEXT("YES") : TEXT("NO"));
-
-		const float Base = ASC->GetNumericAttributeBase(UDDAttributeSet::GetStaminaAttribute());
-		const float Current = ASC->GetNumericAttribute(UDDAttributeSet::GetStaminaAttribute());
-		UE_LOG(LogDD, Log, TEXT("[NetMode : %d] Get Stamina : %f"), GetWorld()->GetNetMode(), ASC->GetSet<UDDAttributeSet>()->GetStamina());
-
-		UE_LOG(LogDD, Warning, TEXT("Stamina - Base: %f | Current: %f"), Base, Current);
+		//EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), 10.0f);
+		ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
 	}
-	
-	UAbilityTask_WaitDelay* WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 0.1f);
+
+	WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
 	if (WaitTask)
 	{
 		WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);

@@ -38,4 +38,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<class UAbilitySystemComponent> ASC;
 
+	UPROPERTY()
+	TObjectPtr<class UAbilityTask_WaitDelay> WaitTask;
 };

@@ -31,10 +31,18 @@ ADDCharacterBase::ADDCharacterBase()
 	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
 }
 
+void ADDCharacterBase::NetMulticastStopAnimMontage_Implementation(UAnimMontage* Montage)
+{
+	if (GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Stop(1.0f, Montage);
+	}
+}
+
 void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* Montage, FName SectionName) 
 {
 	//if (IsLocallyControlled()) return;
-	UE_LOG(LogDD, Display, TEXT("[NetMode : %d] NetMulticastPlayAnimMontage_Implementation"), GetWorld()->GetNetMode());
+	//UE_LOG(LogDD, Display, TEXT("[NetMode : %d] NetMulticastPlayAnimMontage_Implementation"), GetWorld()->GetNetMode());
 	if ( GetMesh() && GetMesh()->GetAnimInstance() )
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f);

@@ -17,6 +17,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastPlayAnimMontage(UAnimMontage* Montage, FName SectionName);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastStopAnimMontage(UAnimMontage* Montage);
+
 protected:
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 };

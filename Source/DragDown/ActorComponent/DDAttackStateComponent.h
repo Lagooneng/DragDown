@@ -18,6 +18,7 @@ public:
 	FORCEINLINE int8 GetAttackState() { return NowAttackState; }
 
 	void PlusAttackState();
+	void MinusAttackState();
 
 	FString GetSectionPrefix();
 	float GetPower();

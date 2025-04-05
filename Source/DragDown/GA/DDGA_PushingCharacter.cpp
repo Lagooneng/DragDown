@@ -233,15 +233,18 @@ void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle,
 
 void UDDGA_PushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
 {
-	if ( EventTask && EventTask->IsActive() )
+	if ( AttackStateComponent )
 	{
-		EventTask->EndTask();
+		AttackStateComponent->MinusAttackState();
 	}
-
-	// for Local Prediction Role Back
+	
 	if (AvatarCharacter)
 	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
+		if (PushingMontage)
+		{
+			Character->NetMulticastStopAnimMontage(PushingMontage);
+		}
 	}
 
 	bIsTraced = false;

@@ -28,6 +28,11 @@ void UDDAttackStateComponent::PlusAttackState()
 	NowAttackState = (NowAttackState + 1) % MaxAttackState;
 }
 
+void UDDAttackStateComponent::MinusAttackState()
+{
+	NowAttackState = (NowAttackState - 1 >= 0) ? NowAttackState - 1 : MaxAttackState - 1;
+}
+
 FString UDDAttackStateComponent::GetSectionPrefix()
 {
 	if (StateDrivenAttackData) return StateDrivenAttackData->MontageSectionNamePrefix;
