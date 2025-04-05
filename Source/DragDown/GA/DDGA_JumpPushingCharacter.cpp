@@ -15,6 +15,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/DDCharacterBase.h"
+#include "Attribute/DDAttributeSet.h"
 
 UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 {
@@ -27,9 +28,17 @@ UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 		PushingMontage = PushingMontageRef.Object;
 	}
 
+	static ConstructorHelpers::FClassFinder<UGameplayEffect> DownStaminaEffectRef(TEXT("/Game/Blueprint/GA/GE/BPGE_DownStamina.BPGE_DownStamina_C"));
+	if (DownStaminaEffectRef.Succeeded())
+	{
+		DownStaminaEffect = DownStaminaEffectRef.Class;
+	}
+
 	bIsTraced = false;
 	Power = 400.0f;
 	ZPower = 800.0f;
+
+	NecessaryStamina = 40.0f;
 
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
@@ -43,9 +52,14 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
 	{
 		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
-	}
 
-	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
+		if (EffectSpecHandle.IsValid())
+		{
+			EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), -NecessaryStamina);
+			ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
+		}
+	}
 
 	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
 	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
@@ -174,4 +188,34 @@ void UDDGA_JumpPushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle 
 	bIsTraced = false;
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
+}
+
+bool UDDGA_JumpPushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+	if (ASC == nullptr) return false;
+
+	const UDDAttributeSet* AttributeSet = ASC->GetSet<UDDAttributeSet>();
+	if (AttributeSet == nullptr) return false;
+
+	float CurrentStamina = AttributeSet->GetStamina();
+
+	if (CurrentStamina < NecessaryStamina)
+	{
+		return false;
+	}
+
+	return true; 
+}
+
+void UDDGA_JumpPushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnAvatarSet(ActorInfo, Spec);
+
+	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 }

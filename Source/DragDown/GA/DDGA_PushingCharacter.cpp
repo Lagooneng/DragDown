@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GA/DDGA_JumpPushingCharacter.h"
 #include "Character/DDCharacterBase.h"
+#include "Attribute/DDAttributeSet.h"
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
@@ -26,6 +27,12 @@ UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 	if ( PushingMontageRef.Succeeded() )
 	{
 		PushingMontage = PushingMontageRef.Object;
+	}
+
+	static ConstructorHelpers::FClassFinder<UGameplayEffect> DownStaminaEffectRef(TEXT("/Game/Blueprint/GA/GE/BPGE_DownStamina.BPGE_DownStamina_C"));
+	if (DownStaminaEffectRef.Succeeded())
+	{
+		DownStaminaEffect = DownStaminaEffectRef.Class;
 	}
 
 	bIsTraced = false;
@@ -64,7 +71,6 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	bIsTraced = false;
 
-	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 	if ( AvatarCharacter )
 	{
 		if (AvatarCharacter->GetCharacterMovement()->IsFalling())
@@ -81,7 +87,6 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		}
 
 		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-		AttackStateComponent = AvatarCharacter->GetComponentByClass<UDDAttackStateComponent>();
 	}
 
 	if (AttackStateComponent == nullptr)
@@ -95,6 +100,13 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
 	{
 		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
+		if (EffectSpecHandle.IsValid())
+		{
+			EffectSpecHandle.Data->SetSetByCallerMagnitude( FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), -AttackStateComponent->GetNecessaryStamina());
+			ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
+		}
 	}
 
 	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
@@ -236,3 +248,39 @@ void UDDGA_PushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Hand
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
 }
+
+bool UDDGA_PushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+	if (ASC == nullptr) return false;
+
+	const UDDAttributeSet* AttributeSet = ASC->GetSet<UDDAttributeSet>();
+	if (AttributeSet == nullptr) return false;
+
+	float CurrentStamina = AttributeSet->GetStamina();
+
+	if (CurrentStamina < AttackStateComponent->GetNecessaryStamina())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void UDDGA_PushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnAvatarSet(ActorInfo, Spec);
+
+	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
+
+	if (AvatarCharacter)
+	{
+		AttackStateComponent = AvatarCharacter->GetComponentByClass<UDDAttackStateComponent>();
+	}
+}
+

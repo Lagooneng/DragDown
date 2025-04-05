@@ -26,4 +26,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "ComboData")
 	TArray< float > ZPower;
+
+	UPROPERTY(EditAnywhere, Category = "ComboData")
+	TArray< float > NecessaryStamina;
 };

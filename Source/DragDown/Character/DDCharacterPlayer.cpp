@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Physics/DDCollision.h"
 #include "Player/DDPlayerState.h"
+#include "ActorComponent/DDBuffManagerComponent.h"
 #include "DragDown.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
@@ -92,6 +93,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 
 	// ASC
 	ASC = nullptr;
+
+	BuffManagerComponent = CreateDefaultSubobject<UDDBuffManagerComponent>(TEXT("BuffManagerComponent"));
 }
 
 UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const
@@ -275,6 +278,8 @@ void ADDCharacterPlayer::SetASC()
 	{
 		UE_LOG(LogDD, Log, TEXT("[NetMode %d] SetASC - ASC Not Found"), GetWorld()->GetNetMode());
 	}
+
+	BuffManagerComponent->Initailize(ASC);
 }
 
 void ADDCharacterPlayer::SetGASAbilities()

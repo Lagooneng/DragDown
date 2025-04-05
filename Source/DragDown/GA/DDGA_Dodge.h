@@ -27,11 +27,20 @@ private:
 
 	void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel) override;
 
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+
+	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> DodgeMontage;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;
+
+	UPROPERTY()
+	TSubclassOf< class UGameplayEffect > DownStaminaEffect;
+
+	float NecessaryStamina;
 
 	UPROPERTY()
 	TObjectPtr<ACharacter> AvatarCharacter;
