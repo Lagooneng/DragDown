@@ -21,18 +21,24 @@ UDDGA_RegenStamina::UDDGA_RegenStamina()
 	{
 		RegenStaminaEffect = RegenStaminaEffectRef.Class;
 	}
+
+	RegenTime = 0.1f;
 }
 
 void UDDGA_RegenStamina::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
-	if (WaitTask)
+	if ( CurrentActorInfo->AvatarActor->HasAuthority() )
 	{
-		WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);
-		WaitTask->ReadyForActivation();
+		WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, RegenTime);
+		if (WaitTask)
+		{
+			WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);
+			WaitTask->ReadyForActivation();
+		}
 	}
+	
 }
 
 void UDDGA_RegenStamina::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -67,7 +73,7 @@ void UDDGA_RegenStamina::ApplyRegenEffect()
 
 	if ( ASC->GetSet<UDDAttributeSet>() && ASC->GetSet<UDDAttributeSet>()->GetStamina() >= 100.0f)
 	{
-		WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
+		WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, RegenTime);
 		if (WaitTask)
 		{
 			WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);
@@ -96,7 +102,7 @@ void UDDGA_RegenStamina::ApplyRegenEffect()
 		ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
 	}
 
-	WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, 1.0f);
+	WaitTask = UAbilityTask_WaitDelay::WaitDelay(this, RegenTime);
 	if (WaitTask)
 	{
 		WaitTask->OnFinish.AddDynamic(this, &UDDGA_RegenStamina::ApplyRegenEffect);

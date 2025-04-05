@@ -40,4 +40,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UAbilityTask_WaitDelay> WaitTask;
+
+	float RegenTime;
+	float RegenValue;
 };
