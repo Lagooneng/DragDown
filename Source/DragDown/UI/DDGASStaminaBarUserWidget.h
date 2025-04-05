@@ -16,6 +16,8 @@ class DRAGDOWN_API UDDGASStaminaBarUserWidget : public UDDGASUserWidget
 	GENERATED_BODY()
 	
 public:
+	UDDGASStaminaBarUserWidget();
+
 	virtual void SetAbilitySystemComponent(AActor* InOwner) override;
 
 	void UpdateStaminaBar();
@@ -30,4 +32,13 @@ protected:
 	float CurrentStamina = 0.0f;
 
 	float CurrentMaxStamina = 0.1f;
+
+// Preidction
+private:
+	void PredictStaminaUI();
+
+	float PredictionDeltaValue;
+	float PredictionPeriod;
+
+	FTimerHandle StaminaPredictionHandle;
 };

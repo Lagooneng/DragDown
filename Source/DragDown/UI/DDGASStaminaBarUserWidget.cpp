@@ -7,6 +7,12 @@
 #include "Components/ProgressBar.h"
 #include "DragDown.h"
 
+UDDGASStaminaBarUserWidget::UDDGASStaminaBarUserWidget()
+{
+	PredictionDeltaValue = 5.0f;
+	PredictionPeriod = 0.5f;
+}
+
 void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 {
 	Super::SetAbilitySystemComponent(InOwner);
@@ -41,6 +47,12 @@ void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 	{
 		UE_LOG(LogDD, Warning, TEXT("ASC is null! Ensure that the Ability System Component is properly initialized before calling this function."));
 	}
+
+	if ( !Owner->HasAuthority() )
+	{
+		GetWorld()->GetTimerManager().SetTimer(StaminaPredictionHandle, this, &UDDGASStaminaBarUserWidget::PredictStaminaUI,
+			PredictionPeriod, true, 0.0f);
+	}	
 }
 
 void UDDGASStaminaBarUserWidget::UpdateStaminaBar()
@@ -66,5 +78,11 @@ void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& 
 void UDDGASStaminaBarUserWidget::OnMaxStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
 	CurrentMaxStamina = ChangeData.NewValue;
+	UpdateStaminaBar();
+}
+
+void UDDGASStaminaBarUserWidget::PredictStaminaUI()
+{
+	CurrentStamina += PredictionDeltaValue;
 	UpdateStaminaBar();
 }

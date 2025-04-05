@@ -4,12 +4,13 @@
 #include "ActorComponent/DDBuffManagerComponent.h"
 #include "AbilitySystemComponent.h"
 
+// GAS로 예측 실행을 했었는데, 발생 시점을 컨트롤하지 못한다면 예측 실행을 하지 않는게 맞음
 // Sets default values for this component's properties
 UDDBuffManagerComponent::UDDBuffManagerComponent()
 {
 	SetIsReplicatedByDefault(true);
 
-	static ConstructorHelpers::FClassFinder<UGameplayEffect> StaminaRegenBuff(TEXT("/Game/Blueprint/GA/GE/BPGE_StaminaRegen.BPGE_StaminaRegen_C"));
+	static ConstructorHelpers::FClassFinder<UGameplayEffect> StaminaRegenBuff(TEXT("/Game/Blueprint/GA/GE/BPGE_RegenStamina.BPGE_RegenStamina_C"));
 	if(StaminaRegenBuff.Succeeded())
 	{
 		InitBuffs.Emplace(StaminaRegenBuff.Class);
