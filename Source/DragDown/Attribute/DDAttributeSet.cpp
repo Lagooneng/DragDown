@@ -13,7 +13,18 @@ UDDAttributeSet::UDDAttributeSet() : MaxStamina(100.0f), Damage(0.0f)
 
 void UDDAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
-	if (Attribute == GetDamageAttribute())
+	
+
+	if (Attribute == GetStaminaAttribute())
+	{
+		if (!GetOwningActor()->HasAuthority())
+		{
+			UE_LOG(LogDD, Log, TEXT("PreAttributeChange : %f"), NewValue);
+		}
+		float Min = 0.0f;
+		NewValue = FMath::Clamp(NewValue, Min, GetMaxStamina());
+	}
+	else if (Attribute == GetDamageAttribute())
 	{
 		NewValue = NewValue < 0.0f ? 0.0f : NewValue;
 	}
@@ -22,7 +33,10 @@ void UDDAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 void UDDAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
-
+	if (!GetOwningActor()->HasAuthority())
+	{
+		UE_LOG(LogDD, Log, TEXT("PostGameplayEffectExecute"));
+	}
 	float MinimumStamina = 0.0f;
 
 	if (Data.EvaluatedData.Attribute == GetStaminaAttribute())
@@ -48,7 +62,7 @@ void UDDAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void UDDAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldStamina)
 {
-	UE_LOG(LogDD, Log, TEXT("[NetMode : %d] OnRep_Stamina : %f"), GetWorld()->GetNetMode(), GetStamina());
+	//UE_LOG(LogDD, Log, TEXT("[NetMode : %d] OnRep_Stamina : %f"), GetWorld()->GetNetMode(), GetStamina());
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UDDAttributeSet, Stamina, OldStamina);
 }
 

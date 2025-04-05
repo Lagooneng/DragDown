@@ -94,7 +94,6 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	// ASC
 	ASC = nullptr;
 
-	BuffManagerComponent = CreateDefaultSubobject<UDDBuffManagerComponent>(TEXT("BuffManagerComponent"));
 }
 
 UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const
@@ -128,6 +127,14 @@ void ADDCharacterPlayer::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	SetASC();
+
+	if ( !HasAuthority() && ASC )
+	{
+		for (const auto& StartAndActivatingAbility : StartAndActivatingAbilities)
+		{
+			ASC->TryActivateAbilityByClass(StartAndActivatingAbility, true);
+		}
+	}
 }
 
 void ADDCharacterPlayer::BeginPlay()
@@ -278,8 +285,6 @@ void ADDCharacterPlayer::SetASC()
 	{
 		UE_LOG(LogDD, Log, TEXT("[NetMode %d] SetASC - ASC Not Found"), GetWorld()->GetNetMode());
 	}
-
-	BuffManagerComponent->Initailize(ASC);
 }
 
 void ADDCharacterPlayer::SetGASAbilities()
@@ -292,6 +297,13 @@ void ADDCharacterPlayer::SetGASAbilities()
 		{
 			FGameplayAbilitySpec StartSpec(StartAbility);
 			ASC->GiveAbility(StartSpec);
+		}
+
+		for (const auto& StartAndActivatingAbility : StartAndActivatingAbilities)
+		{
+			FGameplayAbilitySpec StartSpec(StartAndActivatingAbility);
+			FGameplayAbilitySpecHandle AbilityHandle =  ASC->GiveAbility(StartSpec);
+			ASC->TryActivateAbility(AbilityHandle);
 		}
 
 		for (const auto& StartInputAbility : StartInputAbilities)

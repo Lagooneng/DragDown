@@ -91,9 +91,8 @@ protected:
 	TArray< TSubclassOf<class UGameplayAbility> > StartAbilities;
 
 	UPROPERTY(EditAnywhere, Category = GAS)
-	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
+	TArray< TSubclassOf<class UGameplayAbility> > StartAndActivatingAbilities;
 
-// Buff
-protected:
-	TObjectPtr<class UDDBuffManagerComponent> BuffManagerComponent;
+	UPROPERTY(EditAnywhere, Category = GAS)
+	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
 };

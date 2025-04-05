@@ -7,6 +7,12 @@
 #include "Components/ProgressBar.h"
 #include "DragDown.h"
 
+UDDGASStaminaBarUserWidget::UDDGASStaminaBarUserWidget()
+{
+	StaminaRegenTime = 0.1;
+	StaminaRegenValue = 1.0f;
+}
+
 void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 {
 	Super::SetAbilitySystemComponent(InOwner);
@@ -41,24 +47,23 @@ void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 	{
 		UE_LOG(LogDD, Warning, TEXT("ASC is null! Ensure that the Ability System Component is properly initialized before calling this function."));
 	}
+
+	/*if ( !Owner->HasAuthority() )
+	{
+		GetWorld()->GetTimerManager().SetTimer(PredictionTimer, this, &UDDGASStaminaBarUserWidget::PredictStamina, StaminaRegenTime, true);
+	}*/
 }
 
 void UDDGASStaminaBarUserWidget::UpdateStaminaBar()
 {
 	if (PbStaminaBar)
 	{
-		if ( !Owner->HasAuthority() )
-		{
-			UE_LOG(LogDD, Log, TEXT("[NetMode %d] UpdateEnergyBar : %f / %f"), GetWorld()->GetNetMode(), CurrentStamina, CurrentMaxStamina);
-
-		}
 		PbStaminaBar->SetPercent(CurrentStamina / CurrentMaxStamina);
 	}
 }
 
 void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
-	//UE_LOG(LogDD, Log, TEXT("[NetMode %d]OnEnergyChanged"), GetWorld()->GetNetMode());
 	CurrentStamina = ChangeData.NewValue;
 	UpdateStaminaBar();
 }
@@ -66,5 +71,11 @@ void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& 
 void UDDGASStaminaBarUserWidget::OnMaxStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
 	CurrentMaxStamina = ChangeData.NewValue;
+	UpdateStaminaBar();
+}
+
+void UDDGASStaminaBarUserWidget::PredictStamina()
+{
+	CurrentStamina += StaminaRegenValue;
 	UpdateStaminaBar();
 }
