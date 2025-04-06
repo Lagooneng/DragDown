@@ -19,37 +19,26 @@
 
 UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 {
-	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> PushingMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/Montage/AM_Manny_JumpPushingCharacter.AM_Manny_JumpPushingCharacter'"));
 	if (PushingMontageRef.Succeeded())
 	{
-		PushingMontage = PushingMontageRef.Object;
+		ActionMontage = PushingMontageRef.Object;
 	}
 
-	static ConstructorHelpers::FClassFinder<UGameplayEffect> DownStaminaEffectRef(TEXT("/Game/Blueprint/GA/GE/BPGE_DownStamina.BPGE_DownStamina_C"));
-	if (DownStaminaEffectRef.Succeeded())
-	{
-		DownStaminaEffect = DownStaminaEffectRef.Class;
-	}
-
-	bIsTraced = false;
+	bIsEventTriggered = false;
 	Power = 400.0f;
 	ZPower = 800.0f;
 
 	NecessaryStamina = 40.0f;
-
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
 
 void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	bIsTraced = false;
+	bIsEventTriggered = false;
 
-	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+	if (ASC)
 	{
 		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 
@@ -65,14 +54,12 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
 	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
 	// 본인은 Local Prediction을 통해 지연 완화
-	ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
-	if (Character)
+	if (AvatarCharacter)
 	{
-		UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 		if (ASC)
 		{
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
-			Character->NetMulticastPlayAnimMontage(PushingMontage, FName("Start"));
+			AvatarCharacter->NetMulticastPlayAnimMontage(ActionMontage, FName("Start"));
 		}
 	}
 
@@ -100,8 +87,8 @@ void UDDGA_JumpPushingCharacter::OnPushingEventReceived(FGameplayEventData Paylo
 
 void UDDGA_JumpPushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	if (bIsTraced) return;
-	bIsTraced = true;
+	if (bIsEventTriggered) return;
+	bIsEventTriggered = true;
 	UE_LOG(LogDD, Log, TEXT("OnTraceResultCallback"));
 
 	if ( AvatarCharacter )
@@ -109,7 +96,6 @@ void UDDGA_JumpPushingCharacter::OnTraceResultCallback(const FGameplayAbilityTar
 		AvatarCharacter->LaunchCharacter(FVector(0.0f, 0.0f, 300.0f), true, true);
 	}
 
-	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (ASC)
 	{
 		FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
@@ -165,31 +151,6 @@ void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHan
 	}
 }
 
-void UDDGA_JumpPushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-	bIsTraced = false;
-
-	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
-	{
-		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
-	}
-
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void UDDGA_JumpPushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
-{
-	if (EventTask && EventTask->IsActive())
-	{
-		EventTask->EndTask();
-	}
-
-	// for Local Prediction Role Back
-	bIsTraced = false;
-
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
-}
-
 bool UDDGA_JumpPushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
@@ -197,7 +158,6 @@ bool UDDGA_JumpPushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHa
 		return false;
 	}
 
-	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	if (ASC == nullptr) return false;
 
 	const UDDAttributeSet* AttributeSet = ASC->GetSet<UDDAttributeSet>();
@@ -211,11 +171,4 @@ bool UDDGA_JumpPushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHa
 	}
 
 	return true; 
-}
-
-void UDDGA_JumpPushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
-{
-	Super::OnAvatarSet(ActorInfo, Spec);
-
-	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 }
