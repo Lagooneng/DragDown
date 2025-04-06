@@ -20,24 +20,11 @@
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
-	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted; 
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> PushingMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/Montage/AM_Manny_Pushing.AM_Manny_Pushing'"));
 	if ( PushingMontageRef.Succeeded() )
 	{
-		PushingMontage = PushingMontageRef.Object;
+		ActionMontage = PushingMontageRef.Object;
 	}
-
-	static ConstructorHelpers::FClassFinder<UGameplayEffect> DownStaminaEffectRef(TEXT("/Game/Blueprint/GA/GE/BPGE_DownStamina.BPGE_DownStamina_C"));
-	if (DownStaminaEffectRef.Succeeded())
-	{
-		DownStaminaEffect = DownStaminaEffectRef.Class;
-	}
-
-	bIsTraced = false;
-
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 }
 
 void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -46,36 +33,14 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	
-	if (ActivationInfo.GetActivationPredictionKey().IsValidKey())
-	{
-		FDateTime Now = FDateTime::Now();
-		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
-			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
-			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
 
-		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Client-side(%s) prediction running"),
-			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
-	}
-
-	if (HasAuthority(&ActivationInfo))
-	{
-		FDateTime Now = FDateTime::Now();
-		FString Timestamp = FString::Printf(TEXT("%d-%02d-%02d %02d:%02d:%02d.%03d"),
-			Now.GetYear(), Now.GetMonth(), Now.GetDay(),
-			Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
-
-		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Server-side(%s) authority running"),
-			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
-	}
-
-	bIsTraced = false;
+	bIsEventTriggered = false;
 
 	if ( AvatarCharacter )
 	{
 		if (AvatarCharacter->GetCharacterMovement()->IsFalling())
 		{
-			if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+			if (ASC)
 			{
 				ASC->TryActivateAbilityByClass(UDDGA_JumpPushingCharacter::StaticClass());
 			}
@@ -97,7 +62,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		return;
 	}
 
-	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
+	if (ASC)
 	{
 		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
 
@@ -116,14 +81,12 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
 	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
 	// 본인은 Local Prediction을 통해 지연 완화
-	ADDCharacterBase* Character = Cast<ADDCharacterBase>(AvatarCharacter);
-	if (Character)
+	if (AvatarCharacter)
 	{
-		UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 		if (ASC)
 		{
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
-			Character->NetMulticastPlayAnimMontage(PushingMontage, SectionName);
+			AvatarCharacter->NetMulticastPlayAnimMontage(ActionMontage, SectionName);
 		}
 	}
 
@@ -146,11 +109,10 @@ void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)
 
 void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	if (bIsTraced) return;
-	bIsTraced = true;
+	if (bIsEventTriggered) return;
+	bIsEventTriggered = true;
 	UE_LOG(LogDD, Log, TEXT("[NetMode : %d] OnTraceResultCallback"), GetWorld()->GetNetMode());
 
-	UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	if (ASC)
 	{
 		FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
@@ -214,41 +176,6 @@ void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle&
 	}
 }
 
-void UDDGA_PushingCharacter::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-	bIsTraced = false;
-
-	if (UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get())
-	{
-		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
-	}
-
-	if ( AvatarCharacter )
-	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	}
-
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void UDDGA_PushingCharacter::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancel)
-{
-	if ( EventTask && EventTask->IsActive() )
-	{
-		EventTask->EndTask();
-	}
-
-	// for Local Prediction Role Back
-	if (AvatarCharacter)
-	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	}
-
-	bIsTraced = false;
-
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancel);
-}
-
 bool UDDGA_PushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
@@ -256,7 +183,6 @@ bool UDDGA_PushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle
 		return false;
 	}
 
-	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	if (ASC == nullptr) return false;
 
 	const UDDAttributeSet* AttributeSet = ASC->GetSet<UDDAttributeSet>();
@@ -275,8 +201,6 @@ bool UDDGA_PushingCharacter::CanActivateAbility(const FGameplayAbilitySpecHandle
 void UDDGA_PushingCharacter::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnAvatarSet(ActorInfo, Spec);
-
-	AvatarCharacter = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
 
 	if (AvatarCharacter)
 	{
