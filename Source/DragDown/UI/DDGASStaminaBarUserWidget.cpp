@@ -65,6 +65,11 @@ void UDDGASStaminaBarUserWidget::UpdateStaminaBar(float StaminaToDisplay)
 
 void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
+	if (CurrentStamina > ChangeData.NewValue)
+	{
+		InterpolatedStamina = ChangeData.NewValue;
+		UpdateStaminaBar(InterpolatedStamina);
+	}
 	CurrentStamina = ChangeData.NewValue;
 }
 
