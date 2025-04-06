@@ -7,6 +7,7 @@
 #include "Character/DDCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DragDown.h"
+#include "Tag/DDTag.h"
 
 UDDGA_ActionBase::UDDGA_ActionBase()
 {
@@ -20,7 +21,7 @@ UDDGA_ActionBase::UDDGA_ActionBase()
 	}
 
 	bIsEventTriggered = false;
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+	ActivationBlockedTags.AddTag(DDTAG_STATE_USINGABILITY);
 }
 
 void UDDGA_ActionBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -67,7 +68,7 @@ void UDDGA_ActionBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	if (ASC)
 	{
-		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+		ASC->RemoveLooseGameplayTag(DDTAG_STATE_USINGABILITY);
 	}
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
