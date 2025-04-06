@@ -65,15 +65,12 @@ void UDDGASStaminaBarUserWidget::UpdateStaminaBar(float StaminaToDisplay)
 
 void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
-	//UE_LOG(LogDD, Log, TEXT("[NetMode %d]OnEnergyChanged"), GetWorld()->GetNetMode());
 	CurrentStamina = ChangeData.NewValue;
-	UpdateStaminaBar(CurrentStamina);
 }
 
 void UDDGASStaminaBarUserWidget::OnMaxStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
 	CurrentMaxStamina = ChangeData.NewValue;
-	UpdateStaminaBar(CurrentStamina);
 }
 
 void UDDGASStaminaBarUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -90,5 +87,4 @@ void UDDGASStaminaBarUserWidget::NativeTick(const FGeometry& MyGeometry, float I
 void UDDGASStaminaBarUserWidget::PredictStaminaUI()
 {
 	CurrentStamina += PredictionDeltaValue;
-	UpdateStaminaBar(CurrentStamina);
 }
