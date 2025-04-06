@@ -20,14 +20,21 @@ public:
 
 	virtual void SetAbilitySystemComponent(AActor* InOwner) override;
 
-	void UpdateStaminaBar();
+	void UpdateStaminaBar(float StaminaToDisplay);
 protected:
 	virtual void OnStaminaChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void OnMaxStaminaChanged(const FOnAttributeChangeData& ChangeData);
 
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UProgressBar> PbStaminaBar;
+
+	UPROPERTY(EditAnywhere, Category = "UI|Stamina")
+	float InterpSpeed = 5.0f;
+
+	float InterpolatedStamina = 0.0f;
 
 	float CurrentStamina = 0.0f;
 
