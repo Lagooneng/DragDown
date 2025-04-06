@@ -31,7 +31,7 @@ void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 
 			if (CurrentMaxStamina > 0.0f)
 			{
-				UpdateStaminaBar();
+				UpdateStaminaBar(CurrentStamina);
 			}
 			else
 			{
@@ -55,16 +55,11 @@ void UDDGASStaminaBarUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 	}	
 }
 
-void UDDGASStaminaBarUserWidget::UpdateStaminaBar()
+void UDDGASStaminaBarUserWidget::UpdateStaminaBar(float StaminaToDisplay)
 {
 	if (PbStaminaBar)
 	{
-		if ( !Owner->HasAuthority() )
-		{
-			UE_LOG(LogDD, Log, TEXT("[NetMode %d] UpdateEnergyBar : %f / %f"), GetWorld()->GetNetMode(), CurrentStamina, CurrentMaxStamina);
-
-		}
-		PbStaminaBar->SetPercent(CurrentStamina / CurrentMaxStamina);
+		PbStaminaBar->SetPercent(StaminaToDisplay / CurrentMaxStamina);
 	}
 }
 
@@ -72,17 +67,28 @@ void UDDGASStaminaBarUserWidget::OnStaminaChanged(const FOnAttributeChangeData& 
 {
 	//UE_LOG(LogDD, Log, TEXT("[NetMode %d]OnEnergyChanged"), GetWorld()->GetNetMode());
 	CurrentStamina = ChangeData.NewValue;
-	UpdateStaminaBar();
+	UpdateStaminaBar(CurrentStamina);
 }
 
 void UDDGASStaminaBarUserWidget::OnMaxStaminaChanged(const FOnAttributeChangeData& ChangeData)
 {
 	CurrentMaxStamina = ChangeData.NewValue;
-	UpdateStaminaBar();
+	UpdateStaminaBar(CurrentStamina);
+}
+
+void UDDGASStaminaBarUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (!FMath::IsNearlyEqual(InterpolatedStamina, CurrentStamina, 0.01f))
+	{
+		InterpolatedStamina = FMath::FInterpTo(InterpolatedStamina, CurrentStamina, InDeltaTime, InterpSpeed);
+		UpdateStaminaBar(InterpolatedStamina);
+	}
 }
 
 void UDDGASStaminaBarUserWidget::PredictStaminaUI()
 {
 	CurrentStamina += PredictionDeltaValue;
-	UpdateStaminaBar();
+	UpdateStaminaBar(CurrentStamina);
 }
