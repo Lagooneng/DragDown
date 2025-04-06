@@ -2,16 +2,14 @@
 
 
 #include "GA/DDGA_Dodge.h"
-#include "DDGA_Dodge.h"
-#include "AbilitySystemComponent.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
-#include "DragDown.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/DDCharacterBase.h"
 #include "Misc/DateTime.h"
 #include "Attribute/DDAttributeSet.h"
+#include "Tag/DDTag.h"
+#include "DragDown.h"
 
 UDDGA_Dodge::UDDGA_Dodge()
 {
@@ -51,13 +49,13 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	{
 		if (ASC)
 		{
-			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge")));
-			ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+			ASC->AddLooseGameplayTag(DDTAG_STATE_DODGE);
+			ASC->AddLooseGameplayTag(DDTAG_STATE_USINGABILITY);
 
 			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
 			if (EffectSpecHandle.IsValid())
 			{
-				EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), -NecessaryStamina);
+				EffectSpecHandle.Data->SetSetByCallerMagnitude(DDTAG_DATA_STAMINAUSED, -NecessaryStamina);
 				ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
 			}
 
@@ -69,7 +67,7 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	// Wait task
 	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this,
-		FGameplayTag::RequestGameplayTag(FName("Event.DodgeEnd"))
+		DDTAG_EVENT_DODGEEND
 	);
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_Dodge::OnDodgeEventReceived);
@@ -82,7 +80,7 @@ void UDDGA_Dodge::OnDodgeEventReceived(FGameplayEventData Payload)
 
 	if (ASC)
 	{
-		ASC->RemoveLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge")));
+		ASC->RemoveLooseGameplayTag(DDTAG_STATE_DODGE);
 	}
 
 	bool bReplicatedEndAbility = true; 

@@ -2,20 +2,17 @@
 
 
 #include "GA/DDGA_JumpPushingCharacter.h"
-#include "DDGA_JumpPushingCharacter.h"
-#include "AbilitySystemComponent.h"
-#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
-#include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "GA/AT/DDAT_MultiTrace.h"
 #include "GA/TA/DDTA_MultiTrace.h"
-#include "Misc/DateTime.h"
-#include "DragDown.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/DDCharacterBase.h"
 #include "Attribute/DDAttributeSet.h"
+#include "Tag/DDTag.h"
+#include "DragDown.h"
+
 
 UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 {
@@ -40,12 +37,12 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 
 	if (ASC)
 	{
-		ASC->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.UsingAbility")));
+		ASC->AddLooseGameplayTag(DDTAG_STATE_USINGABILITY);
 
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
 		if (EffectSpecHandle.IsValid())
 		{
-			EffectSpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed")), -NecessaryStamina);
+			EffectSpecHandle.Data->SetSetByCallerMagnitude(DDTAG_DATA_STAMINAUSED, -NecessaryStamina);
 			ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
 		}
 	}
@@ -71,7 +68,7 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 	// Wait task
 	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 		this,
-		FGameplayTag::RequestGameplayTag(FName("Event.PushTrigger"))
+		DDTAG_EVENT_PUSHTRIGGER
 	);
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_JumpPushingCharacter::OnPushingEventReceived);
@@ -124,7 +121,7 @@ void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHan
 		{
 			UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
 
-			if (TargetASC && TargetASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge"))))
+			if (TargetASC && TargetASC->HasMatchingGameplayTag(DDTAG_STATE_DODGE) )
 			{
 				UE_LOG(LogDD, Log, TEXT("Character %s is dodging - skipping LaunchCharacter"), *Character->GetName());
 				++Idx;
