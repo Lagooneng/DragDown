@@ -38,7 +38,7 @@ protected:
 	int32 NowRot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimmick")
-	int32 ActionTime;
+	float ActionTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimmick")
 	bool bIsEaseOut;
