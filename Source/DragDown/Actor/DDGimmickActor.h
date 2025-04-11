@@ -40,4 +40,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimmick")
 	int32 ActionTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimmick")
+	bool bIsEaseOut;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimmick")
+	bool bIsEaseIn;
+
+
 };

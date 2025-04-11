@@ -17,6 +17,9 @@ ADDGimmickActor::ADDGimmickActor()
     ActionTime = 2.0f;
     NowPos = 0;
     NowRot = 0;
+
+    bIsEaseOut = true;
+    bIsEaseIn = true;
 }
 
 void ADDGimmickActor::BeginPlay()
@@ -61,8 +64,8 @@ void ADDGimmickActor::ActGimmick()
         StaticMeshComp,
         TargetPos,
         TargetRot,
-        true,
-        true,
+        bIsEaseOut,
+        bIsEaseIn,
         ActionTime,
         false,
         EMoveComponentAction::Move,
