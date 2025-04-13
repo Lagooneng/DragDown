@@ -9,3 +9,7 @@ Teck Stack
 2025-1학기 단국대학교 캡스톤 디자인
 
 [DragDown Spring boot Server GitHub Repository](https://github.com/Coffeecaat/DragDown)
+- Spring Boot
+- PostgreSQL
+- Redis
+- => Matchmaking Server!
