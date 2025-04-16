@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/DDPoolable.h"
 #include "DDBulletBase.generated.h"
 
 UCLASS()
-class DRAGDOWN_API ADDBulletBase : public AActor
+class DRAGDOWN_API ADDBulletBase : public AActor, public IDDPoolable
 {
 	GENERATED_BODY()
 	
@@ -31,4 +32,26 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float Power;
+
+// Pooling
+protected:
+	void OnRetrievedFromPool() override;
+	void OnReturnedToPool() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastOnRetrievedFromPool(FVector NewLocation, FRotator NewRotation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastOnReturnedToPool();
+
+	void PoolBullet();
+
+	UPROPERTY()
+	FTimerHandle PoolingTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BulletLivingTime;
+
+protected:
+	virtual void FellOutOfWorld(const UDamageType& dmgType) override;
 };

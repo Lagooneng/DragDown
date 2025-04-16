@@ -8,6 +8,8 @@
 #include "Physics/DDCollision.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Subsystem/DDNetworkObjectPoolingSubsystem.h"
+#include "DragDown.h"
 
 ADDBulletBase::ADDBulletBase()
 {
@@ -29,10 +31,11 @@ ADDBulletBase::ADDBulletBase()
 	Movement->MaxSpeed = 3000.0f;
 	Movement->bRotationFollowsVelocity = true;
 	Movement->bShouldBounce = false;
-
-	InitialLifeSpan = 3.0f;
-
+	Movement->ProjectileGravityScale = 0.0f;
+	
 	Power = 3000.0f;
+
+	BulletLivingTime = 1.0f;
 }
 
 void ADDBulletBase::OnComponentBeginOverlapCallback(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
@@ -54,6 +57,66 @@ void ADDBulletBase::PushCharacter(ACharacter* Character)
 		FVector Dir = GetActorForwardVector();
 		Character->LaunchCharacter(Dir * Power, true, true);
 	}
+}
+
+void ADDBulletBase::OnRetrievedFromPool()
+{
+	if ( HasAuthority() )
+	{
+		GetWorld()->GetTimerManager().SetTimer(PoolingTimer, this, &ADDBulletBase::PoolBullet, BulletLivingTime, false);
+
+		NetMulticastOnRetrievedFromPool(GetActorLocation(), GetActorRotation());
+	}
+}
+
+void ADDBulletBase::OnReturnedToPool()
+{
+	if ( HasAuthority() )
+	{
+		NetMulticastOnReturnedToPool();
+	}
+}
+
+void ADDBulletBase::NetMulticastOnRetrievedFromPool_Implementation(FVector NewLocation, FRotator NewRotation)
+{
+	if (Movement)
+	{
+		Movement->StopMovementImmediately();
+		Movement->Velocity = GetActorForwardVector() * Movement->InitialSpeed;
+	}
+
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	SetActorTickEnabled(true);
+
+	SetActorLocationAndRotation(NewLocation, NewRotation);
+}
+
+void ADDBulletBase::NetMulticastOnReturnedToPool_Implementation()
+{
+	if ( Movement )
+	{
+		Movement->StopMovementImmediately();
+		Movement->Velocity = FVector();
+	}
+
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+}
+
+void ADDBulletBase::PoolBullet()
+{
+	UDDNetworkObjectPoolingSubsystem* ObjectPool = GetWorld()->GetSubsystem<UDDNetworkObjectPoolingSubsystem>();
+	if (ObjectPool)
+	{
+		ObjectPool->ReturnPooledObject(Cast<AActor>(this));
+	}
+}
+
+void ADDBulletBase::FellOutOfWorld(const UDamageType& dmgType)
+{
+	PoolBullet(); 
 }
 
 
