@@ -2,8 +2,10 @@
 
 Teck Stack
 - Unreal Engine 5.4
-- Gameplay Ability System - Local Prediction
+- Gameplay Ability System
+  - Local Prediction
 - Listen Server
+  - Network Object Pooling
 
 
 2025-1학기 단국대학교 캡스톤 디자인
