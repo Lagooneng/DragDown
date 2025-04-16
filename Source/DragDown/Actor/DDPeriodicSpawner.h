@@ -4,33 +4,33 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DDPeriodicLauncher.generated.h"
+#include "DDPeriodicSpawner.generated.h"
 
 UCLASS()
-class DRAGDOWN_API ADDPeriodicLauncher : public AActor
+class DRAGDOWN_API ADDPeriodicSpawner : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	ADDPeriodicLauncher();
+	ADDPeriodicSpawner();
 	void Spawn();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Launcher")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mesh")
 	TObjectPtr<class UStaticMeshComponent> StaticMeshComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Launcher")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorSpawned")
 	TSubclassOf<AActor> ActorClass;
 
 	UPROPERTY()
 	FTimerHandle SpawningHandle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Launcher")
-	FRotator Rot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorSpawned")
+	FRotator SpawningRot;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Launcher")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorSpawned")
 	float Offset;
 };
