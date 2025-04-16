@@ -17,7 +17,9 @@ struct FActorArrayWrapper
 
 
 /**
- * 
+ * Subsystems don't support RPC
+ * For Networking, Actors need to use NetMulticast RPCs
+ * IPoolable is an interface that triggers the RPC
  */
 UCLASS()
 class DRAGDOWN_API UDDNetworkObjectPoolingSubsystem : public UWorldSubsystem
