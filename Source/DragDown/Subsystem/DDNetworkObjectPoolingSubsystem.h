@@ -13,6 +13,8 @@ struct FActorArrayWrapper
 
 	UPROPERTY()
 	TArray< TObjectPtr<AActor> > ActorArray;
+	// for performance, ActorArray's Contains -> O(n), ActorSet's Contains -> O(1)
+	TSet< TObjectPtr<AActor> > ActorSet;
 };
 
 

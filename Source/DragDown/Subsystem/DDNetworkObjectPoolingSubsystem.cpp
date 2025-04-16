@@ -34,6 +34,7 @@ void UDDNetworkObjectPoolingSubsystem::InitializePool(TSubclassOf<AActor> ActorC
     UE_LOG(LogDD, Log, TEXT("InitializePool"));
 
     TArray<AActor*> ActorPool;
+    TSet<AActor*> ActorSet;
 
     for (int32 i = 0; i < PoolSize; i++)
     {
@@ -47,11 +48,13 @@ void UDDNetworkObjectPoolingSubsystem::InitializePool(TSubclassOf<AActor> ActorC
             }
 
             ActorPool.Emplace(NewActor);
+            ActorSet.Add(NewActor); 
         }
     }
 
     FActorArrayWrapper Wrapper;
     Wrapper.ActorArray = ActorPool;
+    Wrapper.ActorSet = ActorSet;
 
     PooledActorsMap.Emplace(ActorClass, Wrapper);
 }
@@ -65,21 +68,25 @@ AActor* UDDNetworkObjectPoolingSubsystem::GetPooledObject(TSubclassOf<AActor> Ac
     }
 
     FActorArrayWrapper& ActorPool = PooledActorsMap[ActorClass];
+    int32 PoolSize = ActorPool.ActorArray.Num();
 
-    for (AActor* Actor : ActorPool.ActorArray)
+    // Like a stack
+    if ( PoolSize > 0 )
     {
-        if (Actor && Actor->IsHidden())
+        AActor* Actor = ActorPool.ActorArray.Last();
+        if (Actor == nullptr) return nullptr;
+        ActorPool.ActorArray.RemoveAt(PoolSize - 1);
+        ActorPool.ActorSet.Remove(Actor);
+
+        Actor->SetActorLocationAndRotation(SpawnLocation, SpawnRotation);
+
+        IDDPoolable* PoolableActor = Cast<IDDPoolable>(Actor);
+        if (PoolableActor)
         {
-            Actor->SetActorLocationAndRotation(SpawnLocation, SpawnRotation);
-
-            IDDPoolable* PoolableActor = Cast<IDDPoolable>(Actor);
-            if (PoolableActor)
-            {
-                PoolableActor->OnRetrievedFromPool();
-            }
-
-            return Actor;
+            PoolableActor->OnRetrievedFromPool();
         }
+
+        return Actor;
     }
 
     // No Actor in Pool -> Spawn
@@ -127,9 +134,10 @@ void UDDNetworkObjectPoolingSubsystem::ReturnPooledObject(AActor* Actor)
 
     FActorArrayWrapper& ActorPool = PooledActorsMap[ActorClass];
 
-    if (!ActorPool.ActorArray.Contains(Actor))
+    if (!ActorPool.ActorSet.Contains(Actor))
     {
         //UE_LOG(LogTemp, Log, TEXT("Pool Actor : %s"), *ActorClass->GetName());
         ActorPool.ActorArray.Emplace(Actor);
+        ActorPool.ActorSet.Add(Actor);
     }
 }
