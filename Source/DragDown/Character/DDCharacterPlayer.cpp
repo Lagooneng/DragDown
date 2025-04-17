@@ -15,6 +15,7 @@
 #include "Physics/DDCollision.h"
 #include "Player/DDPlayerState.h"
 #include "ActorComponent/DDBuffManagerComponent.h"
+#include "ActorComponent/DDSurfaceDetectionComponent.h"
 #include "DragDown.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
@@ -95,6 +96,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	ASC = nullptr;
 
 	BuffManagerComponent = CreateDefaultSubobject<UDDBuffManagerComponent>(TEXT("BuffManagerComponent"));
+
+	SurfaceDetectionComponent = CreateDefaultSubobject<UDDSurfaceDetectionComponent>(TEXT("SurfaceDetectionComponent"));
 }
 
 UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const

@@ -11,7 +11,7 @@ public class DragDown : ModuleRules
         PublicIncludePaths.AddRange(new string[] { "DragDown" });
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "InputCore", "NavigationSystem", "UMG",
-															"HTTP", "Json", "JsonUtilities"});
+															"HTTP", "Json", "JsonUtilities", "PhysicsCore"});
 
         PrivateDependencyModuleNames.AddRange(new string[]
         {

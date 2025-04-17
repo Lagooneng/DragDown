@@ -20,13 +20,12 @@ public:
 	ADDCharacterPlayer();
 
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	virtual void PossessedBy(AController* NewController) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual void OnRep_PlayerState() override;
-
+	
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnRep_PlayerState() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 // Camera Section
 protected:
@@ -96,4 +95,8 @@ protected:
 // Buff
 protected:
 	TObjectPtr<class UDDBuffManagerComponent> BuffManagerComponent;
+
+// Surface Detection
+protected:
+	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
 };
