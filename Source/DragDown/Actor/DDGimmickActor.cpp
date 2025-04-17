@@ -31,7 +31,7 @@ void ADDGimmickActor::BeginPlay()
 
 void ADDGimmickActor::ActGimmick()
 {
-    UE_LOG(LogDD, Log, TEXT("ActGimmick"));
+    //UE_LOG(LogDD, Log, TEXT("ActGimmick"));
 
     FVector TargetPos;
     FRotator TargetRot;
@@ -75,7 +75,7 @@ void ADDGimmickActor::ActGimmick()
 
 void ADDGimmickActor::OnActionFinished()
 {
-    UE_LOG(LogDD, Log, TEXT("OnActionFinished"));
+    //UE_LOG(LogDD, Log, TEXT("OnActionFinished"));
     if (TargetPositions.Num() != 0)
     {
         NowPos = ++NowPos % TargetPositions.Num();
