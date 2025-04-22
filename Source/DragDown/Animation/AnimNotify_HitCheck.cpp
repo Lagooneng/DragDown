@@ -5,7 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GameFramework/Actor.h"
-#include "Character/DDCharacterPlayer.h"
+#include "Tag/DDTag.h"
 
 void UAnimNotify_HitCheck::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -19,7 +19,7 @@ void UAnimNotify_HitCheck::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	if (!ASC) return;
 
 	FGameplayEventData EventData;
-	FGameplayTag HitTag = FGameplayTag::RequestGameplayTag(FName("Event.PushTrigger"));
+	FGameplayTag HitTag = DDTAG_EVENT_PUSHTRIGGER;
 	EventData.EventTag = HitTag;
 	EventData.Instigator = Owner;
 	EventData.Target = Owner;

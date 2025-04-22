@@ -29,6 +29,34 @@ ADDCharacterBase::ADDCharacterBase()
 
 	// Attack State 관리, NPC가 사용 가능하니 Base에 설정
 	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
+
+	bIsActionEnabled = true;
+}
+
+void ADDCharacterBase::ClientSetActionEnabled_Implementation(bool bInActionEnabled)
+{
+	if ( IsLocallyControlled() )
+	{
+		bIsActionEnabled = bInActionEnabled; 
+	}
+}
+
+void ADDCharacterBase::SetActionEnabled(bool bInActionEnabled)
+{
+	bIsActionEnabled = bInActionEnabled;
+
+	if ( HasAuthority() )
+	{
+		ClientSetActionEnabled(bInActionEnabled);
+	}
+}
+
+
+void ADDCharacterBase::Jump()
+{
+	if (!bIsActionEnabled) return;
+
+	Super::Jump();
 }
 
 void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* Montage, FName SectionName) 

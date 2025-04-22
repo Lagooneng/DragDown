@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GameFramework/Actor.h"
+#include "Tag/DDTag.h"
 
 void UAnimNotify_DodgeEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -17,7 +18,7 @@ void UAnimNotify_DodgeEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	if (!ASC) return;
 
 	FGameplayEventData EventData;
-	FGameplayTag DodgeEndTag = FGameplayTag::RequestGameplayTag(FName("Event.DodgeEnd"));
+	FGameplayTag DodgeEndTag = DDTAG_EVENT_DODGEEND;
 	EventData.EventTag = DodgeEndTag;
 	EventData.Instigator = Owner;
 	EventData.Target = Owner;
