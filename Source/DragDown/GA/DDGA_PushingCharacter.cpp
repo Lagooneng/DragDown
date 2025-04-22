@@ -48,9 +48,9 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 			return;
 		}
-
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	}
+
+	DisableInput();
 
 	if (AttackStateComponent == nullptr)
 	{
@@ -117,10 +117,6 @@ void UDDGA_PushingCharacter::OnTraceResultCallback(const FGameplayAbilityTargetD
 		ProcessPush(TargetDataHandle);
 		AttackStateComponent->PlusAttackState();
 	}
-
-	bool bReplicatedEndAbility = true; 
-	bool bWasCancelled = false; 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled); 
 }
 
 void UDDGA_PushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle)

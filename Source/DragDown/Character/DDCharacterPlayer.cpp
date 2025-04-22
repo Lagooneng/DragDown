@@ -118,7 +118,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump); 
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Jump);  
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping); 
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
@@ -152,6 +152,8 @@ void ADDCharacterPlayer::BeginPlay()
 
 void ADDCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 {
+	if (!bIsActionEnabled) return;
+
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	AddMovementInput(FollowCamera->GetForwardVector(), MovementVector.X);
@@ -193,6 +195,8 @@ void ADDCharacterPlayer::SetupGASInputComponent()
 
 void ADDCharacterPlayer::GASInputPressed(int32 InputId)
 {
+	if (!bIsActionEnabled) return;
+
 	HandleGASInputPressed(InputId);
 
 	if( !HasAuthority() )
@@ -234,6 +238,8 @@ void ADDCharacterPlayer::HandleGASInputPressed(int32 InputId)
 
 void ADDCharacterPlayer::GASInputReleased(int32 InputId)
 {
+	if (!bIsActionEnabled) return;
+
 	HandleGASInputReleased(InputId);
 
 	if (!HasAuthority())

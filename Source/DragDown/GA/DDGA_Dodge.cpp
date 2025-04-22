@@ -38,8 +38,10 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 			return;
 		}
 
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+		//AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	}
+
+	DisableInput();
 
 	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
 	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
@@ -82,10 +84,6 @@ void UDDGA_Dodge::OnDodgeEventReceived(FGameplayEventData Payload)
 	{
 		ASC->RemoveLooseGameplayTag(DDTAG_STATE_DODGE);
 	}
-
-	bool bReplicatedEndAbility = true; 
-	bool bWasCancelled = false; 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled); 
 }
 
 bool UDDGA_Dodge::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const

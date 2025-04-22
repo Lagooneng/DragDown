@@ -22,13 +22,24 @@ public:
 protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	
+	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
+
 	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
+	UFUNCTION()
+	virtual void OnAnimEnd(FGameplayEventData Payload);
+
+	void EnableInput(); 
+	void DisableInput();
 
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> ActionMontage;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;
+
+	UPROPERTY()
+	TObjectPtr < class UAbilityTask_WaitGameplayEvent > AnimEndTask;
 
 	UPROPERTY()
 	TSubclassOf< class UGameplayEffect > DownStaminaEffect;
