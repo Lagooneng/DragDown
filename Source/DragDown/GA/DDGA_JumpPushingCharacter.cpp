@@ -58,12 +58,11 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 			AvatarCharacter->NetMulticastPlayAnimMontage(ActionMontage, FName("Start"));
 		}
-	}
 
-	if ( AvatarCharacter ) 
-	{
 		AvatarCharacter->LaunchCharacter(FVector(0.0f, 0.0f, 300.0f), true, true);
 	}
+
+	DisableInput();
 
 	// Wait task
 	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
@@ -98,10 +97,6 @@ void UDDGA_JumpPushingCharacter::OnTraceResultCallback(const FGameplayAbilityTar
 		FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 		ProcessPush(TargetDataHandle);
 	}
-
-	bool bReplicatedEndAbility = true;
-	bool bWasCancelled = false;
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
 }
 
 void UDDGA_JumpPushingCharacter::ProcessPush(const FGameplayAbilityTargetDataHandle& TargetDataHandle)

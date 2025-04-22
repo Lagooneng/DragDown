@@ -17,6 +17,15 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastPlayAnimMontage(UAnimMontage* Montage, FName SectionName);
 
+	void SetActionEnabled(bool bInActionEnabled);
+
 protected:
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetActionEnabled(bool bInActionEnabled);
+
+	virtual void Jump() override;
+
+	bool bIsActionEnabled;
 };

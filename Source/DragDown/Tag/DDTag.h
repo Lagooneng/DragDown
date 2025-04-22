@@ -7,4 +7,5 @@
 #define DDTAG_STATE_DODGE			FGameplayTag::RequestGameplayTag(FName("Player.State.Dodge"))
 #define DDTAG_EVENT_DODGEEND		FGameplayTag::RequestGameplayTag(FName("Event.DodgeEnd"))
 #define DDTAG_EVENT_PUSHTRIGGER		FGameplayTag::RequestGameplayTag(FName("Event.PushTrigger"))
+#define DDTAG_EVENT_ANIMEND			FGameplayTag::RequestGameplayTag(FName("Event.AnimEnd"))
 #define DDTAG_DATA_STAMINAUSED		FGameplayTag::RequestGameplayTag(FName("Data.StaminaUsed"))

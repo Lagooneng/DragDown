@@ -26,6 +26,8 @@ UDDGA_ActionBase::UDDGA_ActionBase()
 
 void UDDGA_ActionBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
 	if (ActivationInfo.GetActivationPredictionKey().IsValidKey())
 	{
 		FDateTime Now = FDateTime::Now();
@@ -49,6 +51,14 @@ void UDDGA_ActionBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 	}
 
 	bIsEventTriggered = false;
+
+	AnimEndTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent( 
+		this,
+		DDTAG_EVENT_ANIMEND 
+	);
+
+	AnimEndTask->EventReceived.AddDynamic(this, &UDDGA_ActionBase::OnAnimEnd);
+	AnimEndTask->ReadyForActivation();
 }
 
 void UDDGA_ActionBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -60,10 +70,9 @@ void UDDGA_ActionBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		EventTask->EndTask();
 	}
 
-	// for Local Prediction Role Back
-	if (AvatarCharacter)
+	if ( AnimEndTask && AnimEndTask->IsActive() )
 	{
-		AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		AnimEndTask->EndTask();
 	}
 
 	if (ASC)
@@ -74,10 +83,42 @@ void UDDGA_ActionBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
+void UDDGA_ActionBase::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+{
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+	EnableInput();
+}
+
 void UDDGA_ActionBase::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnAvatarSet(ActorInfo, Spec);
 
 	AvatarCharacter = Cast<ADDCharacterBase>(ActorInfo->AvatarActor.Get());
 	ASC = ActorInfo->AbilitySystemComponent.Get();
+}
+
+void UDDGA_ActionBase::OnAnimEnd(FGameplayEventData Payload)
+{
+	EnableInput();
+
+	bool bReplicatedEndAbility = true;
+	bool bWasCancelled = false;
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
+}
+
+void UDDGA_ActionBase::EnableInput()
+{
+	if (AvatarCharacter)
+	{
+		AvatarCharacter->SetActionEnabled(true);
+	}
+}
+
+void UDDGA_ActionBase::DisableInput()
+{
+	if ( AvatarCharacter )
+	{
+		AvatarCharacter->SetActionEnabled(false);
+	}
 }
