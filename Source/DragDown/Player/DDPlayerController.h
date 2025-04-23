@@ -19,7 +19,9 @@ public:
 
 protected:
 	virtual void BeginPlayingState() override;
+	virtual void SetupInputComponent() override;
 
+// GAS Widget
 protected:
 	void InitGASWidget();
 
@@ -29,4 +31,19 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UDDGASStaminaBarUserWidget> StaminaBarWidget;
+
+// Normal Widget
+public:
+	void ToggleMenu();
+	void OpenMenu();
+	void CloseMenu();
+
+	// UMG 위젯 클래스 (블루프린트에서 설정)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> MenuWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<class UUserWidget> MenuWidget;
+
+	bool bIsMenuOpen;
 };

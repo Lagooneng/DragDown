@@ -16,4 +16,25 @@ class DRAGDOWN_API UDDUserSettings : public UGameUserSettings
 	
 public:
 	UDDUserSettings();
+
+	virtual void ApplySettings(bool bForce = false) override;
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetBGMVolume() { return BGMVolume; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetBGMVolume(float InBGMVolume);
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetSFXVolume() { return SFXVolume; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetSFXVolume(float InSFXVolume);
+
+protected:
+	UPROPERTY(Config)
+	float BGMVolume;
+
+	UPROPERTY(Config)
+	float SFXVolume;
 };
