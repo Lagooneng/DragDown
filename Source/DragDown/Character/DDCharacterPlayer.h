@@ -12,15 +12,13 @@
  * 
  */
 UCLASS()
-class DRAGDOWN_API ADDCharacterPlayer : public ADDCharacterBase, public IAbilitySystemInterface
+class DRAGDOWN_API ADDCharacterPlayer : public ADDCharacterBase
 {
 	GENERATED_BODY()
 	
 public:
 	ADDCharacterPlayer();
 
-	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnRep_PlayerState() override;
@@ -52,51 +50,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderLookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> PushingAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> DodgeAction;
-
-	// ASC Section
+// GAS Section
 protected:
-	void SetupGASInputComponent();
-
-	// Input Pressed RPC **************************************
-	void GASInputPressed(int32 InputId);
-
-	UFUNCTION(Server, Reliable)
-	void ServerGASInputPressed(int32 InputId);
-
-	void HandleGASInputPressed(int32 InputId);
-	// ********************************************************
-
-	// Input Released RPC *************************************
-	void GASInputReleased(int32 InputId);
-
-	UFUNCTION(Server, Reliable)
-	void ServerGASInputReleased(int32 InputId);
-
-	void HandleGASInputReleased(int32 InputId);
-	// ********************************************************
-
-	void SetASC();
-	void SetGASAbilities();
-
-	UPROPERTY(EditAnywhere, Category = GAS)
-	TObjectPtr<class UAbilitySystemComponent> ASC;
-
-	UPROPERTY(EditAnywhere, Category = GAS)
-	TArray< TSubclassOf<class UGameplayAbility> > StartAbilities;
-
-	UPROPERTY(EditAnywhere, Category = GAS)
-	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UDDGASManagerComponent> GASManagerComponent;
 
 // Buff
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDBuffManagerComponent> BuffManagerComponent;
 
 // Surface Detection
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
+
 };

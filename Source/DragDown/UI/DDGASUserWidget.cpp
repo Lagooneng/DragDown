@@ -2,7 +2,7 @@
 
 
 #include "UI/DDGASUserWidget.h"
-#include "AbilitySystemBlueprintLibrary.h"
+#include "ActorComponent/DDGASManagerComponent.h"
 
 void UDDGASUserWidget::SetOwner(AActor* InOwner)
 {
@@ -14,10 +14,13 @@ void UDDGASUserWidget::SetOwner(AActor* InOwner)
 
 void UDDGASUserWidget::SetAbilitySystemComponent(AActor* InOwner)
 {
-	if (IsValid(InOwner))
-	{
-		ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner);
-	}
+	if (!IsValid(InOwner)) return;
+
+	UDDGASManagerComponent* GASManagerComponent = InOwner->FindComponentByClass<UDDGASManagerComponent>();
+	if (!IsValid(GASManagerComponent)) return;
+
+	ASC = InOwner->FindComponentByClass<UDDGASManagerComponent>()->GetAbilitySystemComponent();
+	
 }
 
 UAbilitySystemComponent* UDDGASUserWidget::GetAbilitySystemComponent() const

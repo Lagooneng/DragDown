@@ -3,6 +3,8 @@
 
 #include "ActorComponent/DDBuffManagerComponent.h"
 #include "AbilitySystemComponent.h"
+#include "GameFramework/Character.h"
+#include "Player/DDPlayerState.h"
 
 // GAS로 예측 실행을 했었는데, 발생 시점을 컨트롤하지 못한다면 예측 실행을 하지 않는게 맞음
 // Sets default values for this component's properties
@@ -19,11 +21,18 @@ UDDBuffManagerComponent::UDDBuffManagerComponent()
 	ASC = nullptr;
 }
 
-void UDDBuffManagerComponent::Initailize(UAbilitySystemComponent* InASC)
+void UDDBuffManagerComponent::Initailize()
 {
 	if (ASC != nullptr) return;
 
-	ASC = InASC;
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (Character == nullptr) return;
+
+	ADDPlayerState* PlayerState = Character->GetPlayerState<ADDPlayerState>();
+	if (PlayerState == nullptr) return;
+
+	ASC = PlayerState->GetAbilitySystemComponent();
+	if (ASC == nullptr) return;
 
 	for (auto Effect : InitBuffs)
 	{
