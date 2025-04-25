@@ -139,6 +139,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetVSync(bool bIsVSync);
 
+	// MasterVolume
+	UFUNCTION(BlueprintCallable)
+	float GetMasterVolume();
+
+	UFUNCTION(BlueprintCallable)
+	void SetMasterVolume(float InMasterVolume);
+
+	// BGMVolume
+	UFUNCTION(BlueprintCallable)
+	float GetBGMVolume();
+
+	UFUNCTION(BlueprintCallable)
+	void SetBGMVolume(float InBGMVolume);
+
+	// SFXVolume
+	UFUNCTION(BlueprintCallable)
+	float GetSFXVolume();
+
+	UFUNCTION(BlueprintCallable)
+	void SetSFXVolume(float InSFXVolume);
+
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;

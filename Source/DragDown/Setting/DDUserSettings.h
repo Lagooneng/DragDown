@@ -20,6 +20,12 @@ public:
 	virtual void ApplySettings(bool bForce = false) override;
 
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetMasterVolume(float InMasterVolume);
+
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetBGMVolume() { return BGMVolume; }
 
 	UFUNCTION(BlueprintCallable)
@@ -32,6 +38,9 @@ public:
 	void SetSFXVolume(float InSFXVolume);
 
 protected:
+	UPROPERTY(Config)
+	float MasterVolume;
+
 	UPROPERTY(Config)
 	float BGMVolume;
 

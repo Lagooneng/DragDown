@@ -49,7 +49,7 @@ int32 UDDGameSettingSubsystem::GetAntiAliasing()
 {
 	if ( UserSettings )
 	{
-		UserSettings->GetAntiAliasingQuality();
+		return UserSettings->GetAntiAliasingQuality();
 	}
 	return 0;
 }
@@ -66,7 +66,7 @@ int32 UDDGameSettingSubsystem::GetPostProcessing()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetPostProcessingQuality();
+		return UserSettings->GetPostProcessingQuality();
 	}
 	return 0;
 }
@@ -83,7 +83,7 @@ int32 UDDGameSettingSubsystem::GetShadows()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetShadowQuality();
+		return UserSettings->GetShadowQuality();
 	}
 	return 0;
 }
@@ -100,7 +100,7 @@ int32 UDDGameSettingSubsystem::GetGlobalIllumination()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetGlobalIlluminationQuality();
+		return UserSettings->GetGlobalIlluminationQuality();
 	}
 	return 0;
 }
@@ -117,7 +117,7 @@ int32 UDDGameSettingSubsystem::GetReflections()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetReflectionQuality();
+		return UserSettings->GetReflectionQuality();
 	}
 	return 0;
 }
@@ -134,7 +134,7 @@ int32 UDDGameSettingSubsystem::GetTextures()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetTextureQuality();
+		return UserSettings->GetTextureQuality();
 	}
 	return 0;
 }
@@ -151,7 +151,7 @@ int32 UDDGameSettingSubsystem::GetEffects()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetVisualEffectQuality();
+		return UserSettings->GetVisualEffectQuality();
 	}
 	return 0;
 }
@@ -168,7 +168,7 @@ int32 UDDGameSettingSubsystem::GetFoliage()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetFoliageQuality();
+		return UserSettings->GetFoliageQuality();
 	}
 	return 0;
 }
@@ -185,7 +185,7 @@ int32 UDDGameSettingSubsystem::GetShading()
 {
 	if (UserSettings)
 	{
-		UserSettings->GetShadingQuality();
+		return UserSettings->GetShadingQuality();
 	}
 	return 0;
 }
@@ -212,6 +212,48 @@ void UDDGameSettingSubsystem::SetVSync(bool bIsVSync)
 	if (UserSettings == nullptr) return;
 
 	UserSettings->SetVSyncEnabled(bIsVSync);
+}
+
+float UDDGameSettingSubsystem::GetMasterVolume()
+{
+	if (UserSettings == nullptr) return 1.0f;
+
+	return UserSettings->GetMasterVolume();
+}
+
+void UDDGameSettingSubsystem::SetMasterVolume(float InMasterVolume)
+{
+	if (UserSettings == nullptr) return;
+
+	UserSettings->SetMasterVolume(InMasterVolume);
+}
+
+float UDDGameSettingSubsystem::GetBGMVolume()
+{
+	if (UserSettings == nullptr) return 1.0f;
+
+	return UserSettings->GetBGMVolume();
+}
+
+void UDDGameSettingSubsystem::SetBGMVolume(float InBGMVolume)
+{
+	if (UserSettings == nullptr) return;
+
+	UserSettings->SetBGMVolume(InBGMVolume);
+}
+
+float UDDGameSettingSubsystem::GetSFXVolume()
+{
+	if (UserSettings == nullptr) return 1.0f;
+
+	return UserSettings->GetSFXVolume();
+}
+
+void UDDGameSettingSubsystem::SetSFXVolume(float InSFXVolume)
+{
+	if (UserSettings == nullptr) return;
+
+	UserSettings->SetSFXVolume(InSFXVolume);
 }
 
 void UDDGameSettingSubsystem::Initialize(FSubsystemCollectionBase& Collection)

@@ -5,6 +5,7 @@
 
 UDDUserSettings::UDDUserSettings()
 {
+	MasterVolume = 1.0f;
 	BGMVolume = 1.0f;
 	SFXVolume = 1.0f;
 
@@ -15,8 +16,15 @@ void UDDUserSettings::ApplySettings(bool bForce)
 {
 	Super::ApplySettings(bForce);
 
+	SetMasterVolume(MasterVolume);
 	SetBGMVolume(BGMVolume);
 	SetSFXVolume(SFXVolume);
+}
+
+void UDDUserSettings::SetMasterVolume(float InMasterVolume)
+{
+	MasterVolume = FMath::Clamp(InMasterVolume, 0.0f, 1.0f);
+	SaveConfig();
 }
 
 void UDDUserSettings::SetBGMVolume(float InBGMVolume)
