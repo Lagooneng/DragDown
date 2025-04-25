@@ -66,11 +66,7 @@ void ADDPlayerController::OpenMenu()
 {
 	if (MenuWidgetClass == nullptr) return;
 	
-	if ( MenuWidget == nullptr )
-	{
-		MenuWidget = CreateWidget(this, MenuWidgetClass);
-	}
-	
+	MenuWidget = CreateWidget(this, MenuWidgetClass);
 	MenuWidget->AddToViewport(100);
 
 	FInputModeGameAndUI UIInputMode; 
@@ -84,7 +80,7 @@ void ADDPlayerController::CloseMenu()
 {
 	if ( MenuWidget )
 	{
-		MenuWidget->RemoveFromViewport();
+		MenuWidget->RemoveFromParent();
 	}
 
 	FInputModeGameOnly InputMode;
