@@ -34,9 +34,9 @@ UAbilitySystemComponent* UDDGASManagerComponent::GetAbilitySystemComponent() con
 	return ASC;
 }
 
-UAbilitySystemComponent* UDDGASManagerComponent::SetASC()
+void UDDGASManagerComponent::SetASC()
 {
-	if (ASC) return ASC;
+	if (ASC) return;
 
 	AActor* Owner = GetOwner();
 	ensure(Cast<APawn>(Owner));
@@ -53,8 +53,6 @@ UAbilitySystemComponent* UDDGASManagerComponent::SetASC()
 	{
 		UE_LOG(LogDD, Log, TEXT("[NetMode %d] SetASC - ASC Not Found"), GetWorld()->GetNetMode());
 	}
-
-	return ASC;
 }
 
 void UDDGASManagerComponent::SetGASAbilities()

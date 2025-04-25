@@ -96,10 +96,15 @@ void UDDGA_ActionBase::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, c
 
 	AvatarCharacter = Cast<ADDCharacterBase>(ActorInfo->AvatarActor.Get());
 	ASC = ActorInfo->AbilitySystemComponent.Get();
+	if (ASC == nullptr)
+	{
+		UE_LOG(LogDD, Error, TEXT("OnAvatarSet - No ASC"));
+	}
 }
 
 void UDDGA_ActionBase::OnAnimEnd(FGameplayEventData Payload)
 {
+	UE_LOG(LogDD, Log, TEXT("OnAnimEnd"));
 	EnableInput();
 
 	bool bReplicatedEndAbility = true;

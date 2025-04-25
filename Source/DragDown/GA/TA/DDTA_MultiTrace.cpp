@@ -3,7 +3,8 @@
 
 #include "GA/TA/DDTA_MultiTrace.h"
 #include "Abilities/GameplayAbility.h"
-#include "AbilitySystemBlueprintLibrary.h"
+//#include "AbilitySystemBlueprintLibrary.h"
+#include "ActorComponent/DDGASManagerComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
@@ -32,15 +33,21 @@ void ADDTA_MultiTrace::ConfirmTargetingAndContinue()
 FGameplayAbilityTargetDataHandle ADDTA_MultiTrace::MakeTargetData() const
 {
 	ACharacter* Character = CastChecked<ACharacter>(SourceActor);
+	if(Character == nullptr) return FGameplayAbilityTargetDataHandle();
 
-	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceActor);
+	//UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceActor);
+
+	UDDGASManagerComponent* GASMangerComponent = SourceActor->FindComponentByClass<UDDGASManagerComponent>();
+	if (GASMangerComponent == nullptr) return FGameplayAbilityTargetDataHandle(); 
+
+	UAbilitySystemComponent* ASC = GASMangerComponent->GetAbilitySystemComponent();
 	if (ASC == nullptr) return FGameplayAbilityTargetDataHandle();
 
 	TArray< FHitResult > OutHitResults;
 	const float AttackRange = 50.0f;
 	const float AttackRaduis = 100.0f;
 
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(UCSAT_ReverseGravityTrace), false, Character);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(UCSAT_ReverseGravityTrace), false, SourceActor);
 	const FVector Forward = Character->GetActorForwardVector();
 	const FVector Start = Character->GetActorLocation() + Forward * Character->GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + Forward * AttackRange;
@@ -50,7 +57,7 @@ FGameplayAbilityTargetDataHandle ADDTA_MultiTrace::MakeTargetData() const
 	FGameplayAbilityTargetDataHandle DataHandle;
 	if (HitDetected)
 	{
-		for (auto OutHitResult : OutHitResults)
+		for (auto& OutHitResult : OutHitResults)
 		{
 			FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(OutHitResult);
 			DataHandle.Add(TargetData);

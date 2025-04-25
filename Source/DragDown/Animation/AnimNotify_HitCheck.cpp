@@ -3,20 +3,23 @@
 
 #include "Animation/AnimNotify_HitCheck.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
+#include "ActorComponent/DDGASManagerComponent.h"
 #include "GameFramework/Actor.h"
 #include "Tag/DDTag.h"
+#include "DragDown.h"
 
 void UAnimNotify_HitCheck::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	if (!MeshComp) return;
-
+	if (MeshComp == nullptr) return;
 
 	AActor* Owner = MeshComp->GetOwner();
-	if (!Owner) return;
+	if (Owner == nullptr) return;
 
-	UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
-	if (!ASC) return;
+	UDDGASManagerComponent* GASMangerComponent = Owner->FindComponentByClass<UDDGASManagerComponent>();
+	if (GASMangerComponent == nullptr) return;
+
+	UAbilitySystemComponent* ASC = GASMangerComponent->GetAbilitySystemComponent();
+	if (ASC == nullptr) return;
 
 	FGameplayEventData EventData;
 	FGameplayTag HitTag = DDTAG_EVENT_PUSHTRIGGER;

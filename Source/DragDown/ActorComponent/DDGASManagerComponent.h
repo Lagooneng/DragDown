@@ -18,7 +18,7 @@ public:
 	
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	UAbilitySystemComponent* SetASC();
+	void SetASC();
 
 	void SetGASAbilities();
 

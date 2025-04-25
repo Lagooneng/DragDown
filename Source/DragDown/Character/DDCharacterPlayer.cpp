@@ -87,18 +87,13 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	GASManagerComponent = CreateDefaultSubobject<UDDGASManagerComponent>(TEXT("GASManagerComponent"));
 }
 
-UAbilitySystemComponent* ADDCharacterPlayer::GetAbilitySystemComponent() const
-{
-	return ASC;
-}
-
 void ADDCharacterPlayer::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	ASC = GASManagerComponent->SetASC();
+	GASManagerComponent->SetASC();
 	GASManagerComponent->SetGASAbilities();
-	BuffManagerComponent->Initailize(ASC);
+	BuffManagerComponent->Initailize();
 }
 
 void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -119,8 +114,8 @@ void ADDCharacterPlayer::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	ASC = GASManagerComponent->SetASC();
-	BuffManagerComponent->Initailize(ASC);
+	GASManagerComponent->SetASC();
+	BuffManagerComponent->Initailize();
 }
 
 void ADDCharacterPlayer::BeginPlay()

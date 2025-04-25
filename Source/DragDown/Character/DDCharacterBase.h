@@ -20,13 +20,14 @@ public:
 	FORCEINLINE bool GetActionEnabled() { return bIsActionEnabled; }
 	void SetActionEnabled(bool bInActionEnabled);
 
+	virtual void Jump() override;
+
 protected:
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 
 	UFUNCTION(Client, Reliable)
 	void ClientSetActionEnabled(bool bInActionEnabled);
 
-	virtual void Jump() override;
 
 	bool bIsActionEnabled;
 };

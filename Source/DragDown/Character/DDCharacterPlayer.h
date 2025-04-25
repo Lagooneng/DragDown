@@ -12,15 +12,13 @@
  * 
  */
 UCLASS()
-class DRAGDOWN_API ADDCharacterPlayer : public ADDCharacterBase, public IAbilitySystemInterface
+class DRAGDOWN_API ADDCharacterPlayer : public ADDCharacterBase
 {
 	GENERATED_BODY()
 	
 public:
 	ADDCharacterPlayer();
 
-	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnRep_PlayerState() override;
@@ -52,20 +50,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShoulderLookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> PushingAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> DodgeAction;
-
 // GAS Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDGASManagerComponent> GASManagerComponent;
-
-	// 플레이어가 ASC를 들고는 있는게 더 편리
-	UPROPERTY()
-	TObjectPtr<class UAbilitySystemComponent> ASC;
 
 // Buff
 protected:

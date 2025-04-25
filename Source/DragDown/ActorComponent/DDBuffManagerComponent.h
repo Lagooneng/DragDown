@@ -15,7 +15,8 @@ class DRAGDOWN_API UDDBuffManagerComponent : public UActorComponent
 public:	
 	UDDBuffManagerComponent();
 
-	void Initailize(class UAbilitySystemComponent* InASC);
+	// Call in OnRep_PlayerState, PossessedBy
+	void Initailize();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MyCategory", meta = (AllowPrivateAccess = "true"))
