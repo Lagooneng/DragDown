@@ -58,45 +58,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> DodgeAction;
 
-	// ASC Section
+// GAS Section
 protected:
-	void SetupGASInputComponent();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UDDGASManagerComponent> GASManagerComponent;
 
-	// Input Pressed RPC **************************************
-	void GASInputPressed(int32 InputId);
-
-	UFUNCTION(Server, Reliable)
-	void ServerGASInputPressed(int32 InputId);
-
-	void HandleGASInputPressed(int32 InputId);
-	// ********************************************************
-
-	// Input Released RPC *************************************
-	void GASInputReleased(int32 InputId);
-
-	UFUNCTION(Server, Reliable)
-	void ServerGASInputReleased(int32 InputId);
-
-	void HandleGASInputReleased(int32 InputId);
-	// ********************************************************
-
-	void SetASC();
-	void SetGASAbilities();
-
-	UPROPERTY(EditAnywhere, Category = GAS)
+	// 플레이어가 ASC를 들고는 있는게 더 편리
+	UPROPERTY()
 	TObjectPtr<class UAbilitySystemComponent> ASC;
-
-	UPROPERTY(EditAnywhere, Category = GAS)
-	TArray< TSubclassOf<class UGameplayAbility> > StartAbilities;
-
-	UPROPERTY(EditAnywhere, Category = GAS)
-	TMap< int32, TSubclassOf<class UGameplayAbility> > StartInputAbilities;
 
 // Buff
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDBuffManagerComponent> BuffManagerComponent;
 
 // Surface Detection
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
+
 };

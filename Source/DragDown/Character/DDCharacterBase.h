@@ -17,6 +17,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastPlayAnimMontage(UAnimMontage* Montage, FName SectionName);
 
+	FORCEINLINE bool GetActionEnabled() { return bIsActionEnabled; }
 	void SetActionEnabled(bool bInActionEnabled);
 
 protected:
