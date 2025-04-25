@@ -8,6 +8,7 @@
 
 ADDPlayerController::ADDPlayerController()
 {
+	bIsMenuOpen = false;
 }
 
 void ADDPlayerController::BeginPlayingState()
@@ -18,6 +19,13 @@ void ADDPlayerController::BeginPlayingState()
 	{
 		InitGASWidget();
 	}
+}
+
+void ADDPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ADDPlayerController::ToggleMenu);
 }
 
 void ADDPlayerController::InitGASWidget()
@@ -46,4 +54,37 @@ void ADDPlayerController::InitGASWidget()
     StaminaBarWidget->SetAbilitySystemComponent(ControlledPawn);
 
     
+}
+
+void ADDPlayerController::ToggleMenu()
+{
+	if (bIsMenuOpen) CloseMenu();
+	else OpenMenu();
+}
+
+void ADDPlayerController::OpenMenu()
+{
+	if (MenuWidgetClass == nullptr) return;
+	
+	MenuWidget = CreateWidget(this, MenuWidgetClass);
+	MenuWidget->AddToViewport(100);
+
+	FInputModeGameAndUI UIInputMode; 
+	UIInputMode.SetWidgetToFocus(MenuWidget->TakeWidget());
+	SetInputMode(UIInputMode);
+	bShowMouseCursor = true;
+	bIsMenuOpen = true;
+}
+
+void ADDPlayerController::CloseMenu()
+{
+	if ( MenuWidget )
+	{
+		MenuWidget->RemoveFromParent();
+	}
+
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	bShowMouseCursor = false;
+	bIsMenuOpen = false;
 }
