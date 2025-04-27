@@ -123,6 +123,7 @@ void UDDGASManagerComponent::HandleGASInputPressed(int32 InputId)
 	if (Spec)
 	{
 		if (Spec->InputPressed) return;
+		UE_LOG(LogDD, Log, TEXT("InputPressed"));
 		Spec->InputPressed = true;
 		if (Spec->IsActive())
 		{
@@ -137,9 +138,6 @@ void UDDGASManagerComponent::HandleGASInputPressed(int32 InputId)
 
 void UDDGASManagerComponent::GASInputReleased(int32 InputId)
 {
-	ensure(Cast<ADDCharacterBase>(GetOwner()));
-	if (!Cast<ADDCharacterBase>(GetOwner())->GetActionEnabled()) return;
-
 	HandleGASInputReleased(InputId);
 
 	if (!GetOwner()->HasAuthority())
