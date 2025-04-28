@@ -3,7 +3,6 @@
 
 #include "GA/TA/DDTA_MultiTrace.h"
 #include "Abilities/GameplayAbility.h"
-//#include "AbilitySystemBlueprintLibrary.h"
 #include "ActorComponent/DDGASManagerComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
@@ -12,7 +11,7 @@
 
 ADDTA_MultiTrace::ADDTA_MultiTrace()
 {
-	bShowDebug = true;
+	bShowDebug = false;
 }
 
 void ADDTA_MultiTrace::StartTargeting(UGameplayAbility* Ability)

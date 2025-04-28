@@ -25,6 +25,13 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+// Data
+protected:
+	void SetData();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr< class UDDCharacterPlayerData > Data;
+
 // Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))

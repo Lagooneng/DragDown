@@ -7,7 +7,6 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
-#include "AbilitySystemComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -15,6 +14,7 @@
 #include "ActorComponent/DDBuffManagerComponent.h"
 #include "ActorComponent/DDSurfaceDetectionComponent.h"
 #include "ActorComponent/DDGASManagerComponent.h"
+#include "DataAsset/DDCharacterPlayerData.h"
 #include "DragDown.h"
 
 
@@ -34,13 +34,6 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Input
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
-	if (nullptr != InputMappingContextRef.Object)
-	{
-		MappingContext = InputMappingContextRef.Object;
-	}
-
 	// Capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_DDCAPSULE);
@@ -49,36 +42,6 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Jump.IA_Jump'"));
-	if (nullptr != InputActionJumpRef.Object)
-	{
-		JumpAction = InputActionJumpRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Move.IA_Move'"));
-	if (nullptr != InputActionShoulderMoveRef.Object)
-	{
-		ShoulderMoveAction = InputActionShoulderMoveRef.Object; 
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShoulderLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Look.IA_Look'"));
-	if (nullptr != InputActionShoulderLookRef.Object)
-	{
-		ShoulderLookAction = InputActionShoulderLookRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/ElfArden/BaseMesh/SK_ElfArden.SK_ElfArden'"));
-	if (CharacterMeshRef.Object)
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
-	}
-
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/ABP_Manny.ABP_Manny_C"));
-	if (AnimInstanceClassRef.Class)
-	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
-	}
 
 	BuffManagerComponent = CreateDefaultSubobject<UDDBuffManagerComponent>(TEXT("BuffManagerComponent"));
 
@@ -99,6 +62,16 @@ void ADDCharacterPlayer::PossessedBy(AController* NewController)
 void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	UE_LOG(LogDD, Log, TEXT("SetupPlayerInputComponent"));
+	
+	SetData();
+
+	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+
+	if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		InputSubsystem->AddMappingContext(MappingContext, 0);
+	}
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
@@ -108,6 +81,26 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
 
 	GASManagerComponent->SetupGASInputComponent();
+}
+
+void ADDCharacterPlayer::SetData()
+{
+	if (Data == nullptr) return;
+
+	GetCharacterMovement()->RotationRate = Data->CharacterPlayerData.RotationRate;
+	GetCharacterMovement()->JumpZVelocity = Data->CharacterPlayerData.JumpZVelocity;
+	GetCharacterMovement()->AirControl = Data->CharacterPlayerData.AirControl;
+	GetCharacterMovement()->MaxWalkSpeed = Data->CharacterPlayerData.MaxWalkSpeed;
+	GetCharacterMovement()->MinAnalogWalkSpeed = Data->CharacterPlayerData.MinAnalogWalkSpeed;
+	GetCharacterMovement()->BrakingDecelerationWalking = Data->CharacterPlayerData.BrakingDecelerationWalking;
+
+	MappingContext = Data->CharacterPlayerData.MappingContext;
+	JumpAction = Data->CharacterPlayerData.JumpAction;
+	ShoulderMoveAction = Data->CharacterPlayerData.ShoulderMoveAction;
+	ShoulderLookAction = Data->CharacterPlayerData.ShoulderLookAction;
+
+	GetMesh()->SetSkeletalMesh(Data->CharacterPlayerData.Mesh);
+	GetMesh()->SetAnimInstanceClass(Data->CharacterPlayerData.AnimInstance);
 }
 
 void ADDCharacterPlayer::OnRep_PlayerState()
@@ -121,15 +114,12 @@ void ADDCharacterPlayer::OnRep_PlayerState()
 void ADDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (IsLocallyControlled())
+	UE_LOG(LogDD, Log, TEXT("BeginPlay"));
+	
+	// Setting for other client
+	if ( !IsLocallyControlled() )
 	{
-		APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-
-		if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			InputSubsystem->AddMappingContext(MappingContext, 0);
-		}
+		SetData();
 	}
 }
 
