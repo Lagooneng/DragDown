@@ -20,6 +20,12 @@ public:
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+protected:
+	virtual void SetData() override;
+
+	UPROPERTY()
+	TSubclassOf<class UGameplayAbility> JumpPushing;
+
 private:
 	UFUNCTION()
 	void OnPushingEventReceived(FGameplayEventData Payload);

@@ -29,20 +29,25 @@ protected:
 	UFUNCTION()
 	virtual void OnAnimEnd(FGameplayEventData Payload);
 
+	virtual void SetData();
+
 	void EnableInput(); 
 	void DisableInput();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TObjectPtr<class UDDActionAbilityData> AbilityData; 
+
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> ActionMontage;
+
+	UPROPERTY()
+	TSubclassOf< class UGameplayEffect > DownStaminaEffect;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > AnimEndTask;
-
-	UPROPERTY()
-	TSubclassOf< class UGameplayEffect > DownStaminaEffect;
 
 	UPROPERTY()
 	TObjectPtr<class ADDCharacterBase> AvatarCharacter;

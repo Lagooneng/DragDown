@@ -20,6 +20,9 @@ public:
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+protected:
+	virtual void SetData() override;
+
 private:
 	UFUNCTION()
 	void OnPushingEventReceived(FGameplayEventData Payload);

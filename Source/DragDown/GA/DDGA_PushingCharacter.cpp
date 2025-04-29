@@ -13,16 +13,12 @@
 #include "GA/DDGA_JumpPushingCharacter.h"
 #include "Character/DDCharacterBase.h"
 #include "Attribute/DDAttributeSet.h"
+#include "DataAsset/DDActionAbilityData.h"
 #include "Tag/DDTag.h"
 #include "DragDown.h"
 
 UDDGA_PushingCharacter::UDDGA_PushingCharacter()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PushingMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/Montage/AM_Manny_Pushing.AM_Manny_Pushing'"));
-	if ( PushingMontageRef.Succeeded() )
-	{
-		ActionMontage = PushingMontageRef.Object;
-	}
 }
 
 void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -40,7 +36,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 		{
 			if (ASC)
 			{
-				ASC->TryActivateAbilityByClass(UDDGA_JumpPushingCharacter::StaticClass());
+				ASC->TryActivateAbilityByClass(JumpPushing); 
 			}
 			
 			bool bReplicatedEndAbility = true;
@@ -96,6 +92,13 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_PushingCharacter::OnPushingEventReceived);
 	EventTask->ReadyForActivation();
+}
+
+void UDDGA_PushingCharacter::SetData()
+{
+	Super::SetData();
+
+	JumpPushing = AbilityData->NextAbility;
 }
 
 void UDDGA_PushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)

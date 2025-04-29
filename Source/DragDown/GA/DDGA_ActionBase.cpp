@@ -6,6 +6,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Character/DDCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "DataAsset/DDActionAbilityData.h"
 #include "DragDown.h"
 #include "Tag/DDTag.h"
 
@@ -49,6 +50,8 @@ void UDDGA_ActionBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, 
 		UE_LOG(LogDD, Warning, TEXT("[%s][NetMode %d] Server-side(%s) authority running"),
 			*Timestamp, GetWorld()->GetNetMode(), *ActorInfo->AvatarActor.Get()->GetName());
 	}
+
+	SetData();
 
 	bIsEventTriggered = false;
 
@@ -110,6 +113,21 @@ void UDDGA_ActionBase::OnAnimEnd(FGameplayEventData Payload)
 	bool bReplicatedEndAbility = true;
 	bool bWasCancelled = false;
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, bReplicatedEndAbility, bWasCancelled);
+}
+
+void UDDGA_ActionBase::SetData()
+{
+	if (AbilityData == nullptr) return;
+
+	if (AbilityData->DownStaminaEffect)
+	{
+		DownStaminaEffect = AbilityData->DownStaminaEffect;
+	}
+
+	if (AbilityData->ActionMontage) 
+	{
+		ActionMontage = AbilityData->ActionMontage;
+	}
 }
 
 void UDDGA_ActionBase::EnableInput()
