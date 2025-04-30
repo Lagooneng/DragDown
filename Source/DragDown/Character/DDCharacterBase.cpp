@@ -52,9 +52,10 @@ void ADDCharacterBase::Jump()
 	Super::Jump();
 }
 
-void ADDCharacterBase::NetMulticastPlayAnimMontage_Implementation(UAnimMontage* Montage, FName SectionName) 
+void ADDCharacterBase::NetMulticastPlayOtherClientMontage_Implementation(UAnimMontage* Montage, FName SectionName)
 {
-	//if (IsLocallyControlled()) return;
+	if (IsLocallyControlled()) return;
+
 	UE_LOG(LogDD, Display, TEXT("[NetMode : %d] NetMulticastPlayAnimMontage_Implementation"), GetWorld()->GetNetMode());
 	if ( GetMesh() && GetMesh()->GetAnimInstance() )
 	{

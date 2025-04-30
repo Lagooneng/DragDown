@@ -26,6 +26,8 @@ protected:
 
 	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 
+	void PlayAnim(FName SectionName);
+
 	UFUNCTION()
 	virtual void OnAnimEnd(FGameplayEventData Payload);
 
@@ -42,6 +44,9 @@ protected:
 
 	UPROPERTY()
 	TSubclassOf< class UGameplayEffect > DownStaminaEffect;
+
+	UPROPERTY()
+	TObjectPtr< class UAbilityTask_PlayMontageAndWait > MontageTask;
 
 	UPROPERTY()
 	TObjectPtr < class UAbilityTask_WaitGameplayEvent > EventTask;

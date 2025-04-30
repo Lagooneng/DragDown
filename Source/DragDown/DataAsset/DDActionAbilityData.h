@@ -32,4 +32,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Optional Property")
 	TSubclassOf< class UGameplayAbility > NextAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Optional Property")
+	FName SectionName;
 };

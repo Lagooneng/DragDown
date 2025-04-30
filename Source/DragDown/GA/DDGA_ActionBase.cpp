@@ -6,6 +6,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Character/DDCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "DataAsset/DDActionAbilityData.h"
 #include "DragDown.h"
 #include "Tag/DDTag.h"
@@ -73,6 +74,11 @@ void UDDGA_ActionBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const
 		EventTask->EndTask();
 	}
 
+	if ( MontageTask && MontageTask->IsActive() )
+	{
+		MontageTask->EndTask();
+	}
+
 	if ( AnimEndTask && AnimEndTask->IsActive() )
 	{
 		AnimEndTask->EndTask();
@@ -102,6 +108,28 @@ void UDDGA_ActionBase::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, c
 	if (ASC == nullptr)
 	{
 		UE_LOG(LogDD, Error, TEXT("OnAvatarSet - No ASC"));
+	}
+}
+
+void UDDGA_ActionBase::PlayAnim(FName SectionName)
+{
+	FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
+
+	// for anim local prediction
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+		this,
+		TEXT("ActionMontage"),
+		ActionMontage,
+		1.0f,
+		SectionName,
+		true);
+
+	MontageTask->ReadyForActivation(); 
+
+	// for other client's fast anim sync
+	if (AvatarCharacter && ASC)
+	{
+		AvatarCharacter->NetMulticastPlayOtherClientMontage(ActionMontage, SectionName);
 	}
 }
 
