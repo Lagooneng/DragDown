@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameUserSettings.h"
+#include "DLSSLibrary.h"
 #include "DDUserSettings.generated.h"
 
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class DRAGDOWN_API UDDUserSettings : public UGameUserSettings
 {
 	GENERATED_BODY()
@@ -19,6 +20,8 @@ public:
 
 	virtual void ApplySettings(bool bForce = false) override;
 
+// Sound
+public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
 
@@ -37,6 +40,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSFXVolume(float InSFXVolume);
 
+// DLSS
+public:
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE UDLSSMode& GetDLSSMode() { return DLSSMode; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetDLSSMode(UDLSSMode InDLSSMode);
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyDLSSMode();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckDLSSAvailable();
+
 protected:
 	UPROPERTY(Config)
 	float MasterVolume;
@@ -46,4 +63,7 @@ protected:
 
 	UPROPERTY(Config)
 	float SFXVolume;
+
+	UPROPERTY(Config)
+	UDLSSMode DLSSMode;
 };
