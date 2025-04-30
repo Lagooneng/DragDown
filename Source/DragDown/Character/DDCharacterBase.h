@@ -15,7 +15,7 @@ public:
 	ADDCharacterBase();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastPlayAnimMontage(UAnimMontage* Montage, FName SectionName);
+	void NetMulticastPlayOtherClientMontage(UAnimMontage* Montage, FName SectionName);
 
 	FORCEINLINE bool GetActionEnabled() { return bIsActionEnabled; }
 	void SetActionEnabled(bool bInActionEnabled);

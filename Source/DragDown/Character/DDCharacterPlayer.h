@@ -76,8 +76,4 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
-
-protected:
-	FTimerHandle TestHandle;
-	void Test();
 };

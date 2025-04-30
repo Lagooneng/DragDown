@@ -14,6 +14,7 @@
 #include "Character/DDCharacterBase.h"
 #include "Attribute/DDAttributeSet.h"
 #include "DataAsset/DDActionAbilityData.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Tag/DDTag.h"
 #include "DragDown.h"
 
@@ -27,6 +28,8 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 
 	bIsEventTriggered = false;
 
@@ -71,18 +74,7 @@ void UDDGA_PushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	FString SectionString = AttackStateComponent->GetSectionPrefix() + FString::FromInt(AttackStateComponent->GetAttackState());
 	FName SectionName(*SectionString);
 
-	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
-	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
-	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
-	// 본인은 Local Prediction을 통해 지연 완화
-	if (AvatarCharacter)
-	{
-		if (ASC)
-		{
-			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
-			AvatarCharacter->NetMulticastPlayAnimMontage(ActionMontage, SectionName);
-		}
-	}
+	PlayAnim(SectionName);
 
 	// Wait task
 	EventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(

@@ -9,6 +9,7 @@
 #include "Misc/DateTime.h"
 #include "Attribute/DDAttributeSet.h"
 #include "DataAsset/DDActionAbilityData.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Tag/DDTag.h"
 #include "DragDown.h"
 
@@ -19,6 +20,8 @@ UDDGA_Dodge::UDDGA_Dodge()
 void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
 
 	if (AvatarCharacter)
 	{
@@ -33,26 +36,18 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	DisableInput();
 
-	// UAbilityTask_PlayMontageAndWait를 썼었는데 플레이어가 Multicast 날리는 거로 변경
-	// 이유: 클라이언트A가 클라이언트 B, C의 애니메이션을 UAbilityTask_PlayMontageAndWait로 복제받으면 느림
-	// RPC가 훨씬 빨라서 다른 클라이언트 애니메이션 동기화가 더 잘되고
-	// 본인은 Local Prediction을 통해 지연 완화
-	if (AvatarCharacter)
+	PlayAnim(AbilityData->SectionName);
+
+	if (AvatarCharacter && ASC)
 	{
-		if (ASC)
+		ASC->AddLooseGameplayTag(DDTAG_STATE_DODGE);
+		ASC->AddLooseGameplayTag(DDTAG_STATE_USINGABILITY);
+
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
+		if (EffectSpecHandle.IsValid())
 		{
-			ASC->AddLooseGameplayTag(DDTAG_STATE_DODGE);
-			ASC->AddLooseGameplayTag(DDTAG_STATE_USINGABILITY);
-
-			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DownStaminaEffect);
-			if (EffectSpecHandle.IsValid())
-			{
-				EffectSpecHandle.Data->SetSetByCallerMagnitude(DDTAG_DATA_STAMINAUSED, -NecessaryStamina);
-				ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
-			}
-
-			FScopedPredictionWindow ScopedPrediction(ASC, !AvatarCharacter->HasAuthority());
-			AvatarCharacter->NetMulticastPlayAnimMontage(ActionMontage, FName());
+			EffectSpecHandle.Data->SetSetByCallerMagnitude(DDTAG_DATA_STAMINAUSED, -NecessaryStamina);
+			ApplyGameplayEffectSpecToOwner(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle);
 		}
 	}
 
