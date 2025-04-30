@@ -24,13 +24,18 @@ protected:
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PreInitializeComponents() override;
 
 // Data
 protected:
+	void SetInputData();
 	void SetData();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr< class UDDCharacterPlayerData > Data;
+
+	UPROPERTY()
+	TObjectPtr<USceneComponent> MeshPivot;
 
 // Camera Section
 protected:
@@ -72,4 +77,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
 
+protected:
+	FTimerHandle TestHandle;
+	void Test();
 };

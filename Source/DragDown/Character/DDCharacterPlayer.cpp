@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/DDCharacterPlayer.h"
@@ -27,7 +27,6 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -35,13 +34,17 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	// Capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_DDCAPSULE);
 
 	// Mesh
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetMobility(EComponentMobility::Movable);
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+
+	MeshPivot = CreateDefaultSubobject<USceneComponent>(TEXT("MeshPivot"));
+	MeshPivot->SetupAttachment(RootComponent);
+
+	GetMesh()->SetupAttachment(MeshPivot); 
 
 	BuffManagerComponent = CreateDefaultSubobject<UDDBuffManagerComponent>(TEXT("BuffManagerComponent"));
 
@@ -64,7 +67,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	UE_LOG(LogDD, Log, TEXT("SetupPlayerInputComponent"));
 	
-	SetData();
+	SetInputData();
 
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 
@@ -83,6 +86,28 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	GASManagerComponent->SetupGASInputComponent();
 }
 
+void ADDCharacterPlayer::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	if (Data) 
+	{
+		// ENetowkSmoothingMode 때문에 Mesh Location, Rotation이 덮어써지는 문제가 있음
+		// PreInitializeComponents에서 설정하면 Default Location, Rotation이 해당 값으로 설정됨
+		SetData(); 
+	}
+}
+
+void ADDCharacterPlayer::SetInputData()
+{
+	if (Data == nullptr) return;
+
+	MappingContext = Data->CharacterPlayerData.MappingContext;
+	JumpAction = Data->CharacterPlayerData.JumpAction;
+	ShoulderMoveAction = Data->CharacterPlayerData.ShoulderMoveAction;
+	ShoulderLookAction = Data->CharacterPlayerData.ShoulderLookAction;
+}
+
 void ADDCharacterPlayer::SetData()
 {
 	if (Data == nullptr) return;
@@ -93,14 +118,14 @@ void ADDCharacterPlayer::SetData()
 	GetCharacterMovement()->MaxWalkSpeed = Data->CharacterPlayerData.MaxWalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = Data->CharacterPlayerData.MinAnalogWalkSpeed;
 	GetCharacterMovement()->BrakingDecelerationWalking = Data->CharacterPlayerData.BrakingDecelerationWalking;
-
-	MappingContext = Data->CharacterPlayerData.MappingContext;
-	JumpAction = Data->CharacterPlayerData.JumpAction;
-	ShoulderMoveAction = Data->CharacterPlayerData.ShoulderMoveAction;
-	ShoulderLookAction = Data->CharacterPlayerData.ShoulderLookAction;
+	GetCapsuleComponent()->SetCapsuleSize(Data->CharacterPlayerData.CapsuleRadius, Data->CharacterPlayerData.CapsuleHeight);
 
 	GetMesh()->SetSkeletalMesh(Data->CharacterPlayerData.Mesh);
 	GetMesh()->SetAnimInstanceClass(Data->CharacterPlayerData.AnimInstance);
+	GetMesh()->SetRelativeLocation(Data->CharacterPlayerData.MeshLocation);
+	GetMesh()->SetRelativeRotation(Data->CharacterPlayerData.MeshRotation);
+
+	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] SetData - Mesh Z Pos : %f"), GetWorld()->GetNetMode(), GetMesh()->GetRelativeLocation().Z);
 }
 
 void ADDCharacterPlayer::OnRep_PlayerState()
@@ -114,19 +139,11 @@ void ADDCharacterPlayer::OnRep_PlayerState()
 void ADDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogDD, Log, TEXT("BeginPlay"));
-	
-	// Setting for other client
-	if ( !IsLocallyControlled() )
-	{
-		SetData();
-	}
 }
 
 void ADDCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 {
 	if (!bIsActionEnabled) return;
-
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	AddMovementInput(FollowCamera->GetForwardVector(), MovementVector.X);

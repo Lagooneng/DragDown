@@ -11,23 +11,44 @@ struct FDDCharacterPlayerDataEntry
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	FRotator RotationRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float JumpZVelocity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float AirControl;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float MaxWalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float MinAnalogWalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float BrakingDecelerationWalking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	float TargetArmLength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
+	TSubclassOf<class UAnimInstance> AnimInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
+	TObjectPtr<class USkeletalMesh> Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
+	FVector MeshLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
+	FRotator MeshRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Capsule")
+	float CapsuleRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Capsule")
+	float CapsuleHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -40,12 +61,6 @@ struct FDDCharacterPlayerDataEntry
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputAction> ShoulderLookAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
-	TObjectPtr<class USkeletalMesh> Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
-	TSubclassOf<class UAnimInstance> AnimInstance;
 };
 
 /**
