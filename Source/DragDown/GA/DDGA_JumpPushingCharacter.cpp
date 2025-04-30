@@ -10,23 +10,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/DDCharacterBase.h"
 #include "Attribute/DDAttributeSet.h"
+#include "DataAsset/DDActionAbilityData.h"
 #include "Tag/DDTag.h"
 #include "DragDown.h"
 
 
 UDDGA_JumpPushingCharacter::UDDGA_JumpPushingCharacter()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PushingMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/Montage/AM_Manny_JumpPushingCharacter.AM_Manny_JumpPushingCharacter'"));
-	if (PushingMontageRef.Succeeded())
-	{
-		ActionMontage = PushingMontageRef.Object;
-	}
-
-	bIsEventTriggered = false;
-	Power = 400.0f;
-	ZPower = 800.0f;
-
-	NecessaryStamina = 40.0f;
 }
 
 void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -72,6 +62,15 @@ void UDDGA_JumpPushingCharacter::ActivateAbility(const FGameplayAbilitySpecHandl
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_JumpPushingCharacter::OnPushingEventReceived);
 	EventTask->ReadyForActivation();
+}
+
+void UDDGA_JumpPushingCharacter::SetData()
+{
+	Super::SetData();
+
+	NecessaryStamina = AbilityData->NecessaryStamina;
+	Power = AbilityData->Power;
+	ZPower = AbilityData->ZPower;
 }
 
 void UDDGA_JumpPushingCharacter::OnPushingEventReceived(FGameplayEventData Payload)

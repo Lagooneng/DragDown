@@ -8,25 +8,17 @@
 #include "Character/DDCharacterBase.h"
 #include "Misc/DateTime.h"
 #include "Attribute/DDAttributeSet.h"
+#include "DataAsset/DDActionAbilityData.h"
 #include "Tag/DDTag.h"
 #include "DragDown.h"
 
 UDDGA_Dodge::UDDGA_Dodge()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/Montage/AM_Manny_Dodge.AM_Manny_Dodge'"));
-	if (DodgeMontageRef.Succeeded())
-	{
-		ActionMontage = DodgeMontageRef.Object;
-	}
-
-	NecessaryStamina = 10.0f;
 }
 
 void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	bIsAvtivated = false;
 
 	if (AvatarCharacter)
 	{
@@ -37,8 +29,6 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 			return;
 		}
-
-		//AvatarCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	}
 
 	DisableInput();
@@ -74,6 +64,13 @@ void UDDGA_Dodge::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	EventTask->EventReceived.AddDynamic(this, &UDDGA_Dodge::OnDodgeEventReceived);
 	EventTask->ReadyForActivation();
+}
+
+void UDDGA_Dodge::SetData()
+{
+	Super::SetData();
+
+	NecessaryStamina = AbilityData->NecessaryStamina;
 }
 
 void UDDGA_Dodge::OnDodgeEventReceived(FGameplayEventData Payload)
