@@ -112,6 +112,8 @@ void ADDCharacterPlayer::SetData()
 {
 	if (Data == nullptr) return;
 
+	CameraBoom->TargetArmLength = Data->CharacterPlayerData.TargetArmLength;
+
 	GetCharacterMovement()->RotationRate = Data->CharacterPlayerData.RotationRate;
 	GetCharacterMovement()->JumpZVelocity = Data->CharacterPlayerData.JumpZVelocity;
 	GetCharacterMovement()->AirControl = Data->CharacterPlayerData.AirControl;
