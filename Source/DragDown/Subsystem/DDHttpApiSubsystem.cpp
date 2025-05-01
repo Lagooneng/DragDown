@@ -53,17 +53,28 @@ void UDDHttpApiSubsystem::SendLoginRequest(const FString& Username, const FStrin
 
 void UDDHttpApiSubsystem::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
+	FResponseStruct ResponseStruct;
+	ResponseStruct.bWasSuccessful = bWasSuccessful;
+
 	if (bWasSuccessful && Response.IsValid())
 	{
 		int32 ResponseCode = Response->GetResponseCode();
 		FString ResponseContent = Response->GetContentAsString();
+		ResponseStruct.ResponseCode = ResponseCode;
+		ResponseStruct.ResponseContent = ResponseContent;
 
 		UE_LOG(LogDD, Log, TEXT("ResponseCode: %d"), ResponseCode);
 		UE_LOG(LogDD, Log, TEXT("ResponseContent: %s"), *ResponseContent);
 	}
 	else
 	{
-		UE_LOG(LogDD, Error, TEXT("Request Failed"));
+		FString Error = Response.IsValid() ? Response->GetContentAsString() : TEXT("Invalid Response");
+		ResponseStruct.ErrorContent = Error;
+
+		UE_LOG(LogDD, Error, TEXT("Request Failed: %s"), *Error);
 	}
+
+	// UnBind는 바인딩하는 쪽에서 알아서
+	OnRequestCompleted.Broadcast(ResponseStruct);
 }
 
