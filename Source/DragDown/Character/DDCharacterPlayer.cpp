@@ -16,7 +16,8 @@
 #include "ActorComponent/DDGASManagerComponent.h"
 #include "DataAsset/DDCharacterPlayerData.h"
 #include "DragDown.h"
-
+#include "DataAsset/DDMeshDatas.h"
+#include "ActorComponent/DDMeshManagerComponent.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -126,7 +127,7 @@ void ADDCharacterPlayer::SetData()
 	GetMesh()->SetAnimInstanceClass(Data->CharacterPlayerData.AnimInstance);
 	GetMesh()->SetRelativeLocation(Data->CharacterPlayerData.MeshLocation);
 	GetMesh()->SetRelativeRotation(Data->CharacterPlayerData.MeshRotation);
-
+	MeshManagerComponent->SetMergedMesh(EMESHID::MERCC);
 	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] SetData - Mesh Z Pos : %f"), GetWorld()->GetNetMode(), GetMesh()->GetRelativeLocation().Z);
 }
 
