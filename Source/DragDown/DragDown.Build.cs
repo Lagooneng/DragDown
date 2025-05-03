@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 using UnrealBuildTool;
+using UnrealBuildTool.Rules;
 
 public class DragDown : ModuleRules
 {
@@ -11,7 +12,8 @@ public class DragDown : ModuleRules
         PublicIncludePaths.AddRange(new string[] { "DragDown" });
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "InputCore", "NavigationSystem", "UMG",
-															"HTTP", "Json", "JsonUtilities", "PhysicsCore", "DLSS", "DLSSBlueprint"});
+															"HTTP", "Json", "JsonUtilities", "PhysicsCore", "DLSS", "DLSSBlueprint", "SkeletalMerging",
+															"EditorScriptingUtilities"});
 
         PrivateDependencyModuleNames.AddRange(new string[]
         {

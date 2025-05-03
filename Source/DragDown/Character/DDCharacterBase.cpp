@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/DDCollision.h"
 #include "ActorComponent/DDAttackStateComponent.h"
+#include "ActorComponent/DDMeshManagerComponent.h"
 #include "DragDown.h"
 
 // Sets default values
@@ -22,6 +23,10 @@ ADDCharacterBase::ADDCharacterBase()
 
 	// Attack State 관리, NPC가 사용 가능하니 Base에 설정
 	AttackStateComponent = CreateDefaultSubobject<UDDAttackStateComponent>(TEXT("AttackStateComponent"));
+
+	MeshManagerComponent = CreateDefaultSubobject<UDDMeshManagerComponent>(TEXT("MeshManagerComponent"));
+	HairSKMComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HairMeshComponent"));
+	HairSKMComponent->SetupAttachment(GetMesh());
 
 	bIsActionEnabled = true;
 }
