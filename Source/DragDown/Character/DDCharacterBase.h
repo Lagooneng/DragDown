@@ -22,12 +22,25 @@ public:
 
 	virtual void Jump() override;
 
+// Action
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UDDAttackStateComponent> AttackStateComponent;
 
+	
 	UFUNCTION(Client, Reliable)
 	void ClientSetActionEnabled(bool bInActionEnabled);
 
-
 	bool bIsActionEnabled;
+
+// Mesh
+public:
+	FORCEINLINE USkeletalMeshComponent* GetHairMeshComponent() { return HairSKMComponent; }
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UDDMeshManagerComponent> MeshManagerComponent;
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> HairSKMComponent;
 };
