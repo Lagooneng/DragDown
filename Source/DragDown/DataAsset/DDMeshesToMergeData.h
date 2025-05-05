@@ -26,4 +26,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPhysicsAsset> PhysicsAsset; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class UAnimInstance> AnimInstance;
 };

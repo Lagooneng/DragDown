@@ -28,16 +28,28 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 
-	FSkeletalMeshMergeParams MergeParams;
-	MergeParams.MeshesToMerge = MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge;
-	MergeParams.Skeleton = MeshDatas->Meshes.Find(MeshID)->Get()->Skeleton;
-	MergeParams.StripTopLODS = 0;
-	MergeParams.bSkeletonBefore = true;
-	MergeParams.bNeedsCpuAccess = true;
+	if ( MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge.Num() > 2)
+	{
+		FSkeletalMeshMergeParams MergeParams;
+		MergeParams.MeshesToMerge = MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge;
+		MergeParams.Skeleton = MeshDatas->Meshes.Find(MeshID)->Get()->Skeleton;
+		MergeParams.StripTopLODS = 0;
+		MergeParams.bSkeletonBefore = true;
+		MergeParams.bNeedsCpuAccess = true;
 
-	USkeletalMesh* MergedMesh = USkeletalMergingLibrary::MergeMeshes(MergeParams);
-	MergedMesh->SetPhysicsAsset(MeshDatas->Meshes.Find(MeshID)->Get()->PhysicsAsset);
-	Character->GetMesh()->SetSkeletalMesh(MergedMesh);
+		USkeletalMesh* MergedMesh = USkeletalMergingLibrary::MergeMeshes(MergeParams);
+		//MergedMesh->SetPhysicsAsset(MeshDatas->Meshes.Find(MeshID)->Get()->PhysicsAsset);
+		Character->GetMesh()->SetSkeletalMesh(MergedMesh);
+	}
+	if (MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge.Num() == 1)
+	{
+		Character->GetMesh()->SetSkeletalMesh(MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge[0]);
+	}
+
+	if (MeshDatas->Meshes.Find(MeshID)->Get()->AnimInstance)
+	{
+		Character->GetMesh()->SetAnimInstanceClass(MeshDatas->Meshes.Find(MeshID)->Get()->AnimInstance);
+	}
 
 	SetHairMesh(MeshID);
 }

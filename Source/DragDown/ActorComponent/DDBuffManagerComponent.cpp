@@ -12,12 +12,6 @@ UDDBuffManagerComponent::UDDBuffManagerComponent()
 {
 	SetIsReplicatedByDefault(true);
 
-	static ConstructorHelpers::FClassFinder<UGameplayEffect> StaminaRegenBuff(TEXT("/Game/Blueprint/GA/GE/BPGE_RegenStamina.BPGE_RegenStamina_C"));
-	if(StaminaRegenBuff.Succeeded())
-	{
-		InitBuffs.Emplace(StaminaRegenBuff.Class);
-	}
-
 	ASC = nullptr;
 }
 

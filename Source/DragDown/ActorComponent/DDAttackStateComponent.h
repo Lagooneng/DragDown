@@ -14,6 +14,8 @@ class DRAGDOWN_API UDDAttackStateComponent : public UActorComponent
 
 public:	
 	UDDAttackStateComponent();
+
+	virtual void BeginPlay() override;
 	
 	FORCEINLINE int8 GetAttackState() { return NowAttackState; }
 
@@ -24,10 +26,10 @@ public:
 	float GetZPower();
 	float GetNecessaryStamina();
 
-private:
+protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr < class UDDStateDrivenAttackData > StateDrivenAttackData;
 
 	UPROPERTY(Replicated)

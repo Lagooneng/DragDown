@@ -13,18 +13,26 @@ UDDAttackStateComponent::UDDAttackStateComponent()
 	SetIsReplicatedByDefault(true);
 
 	NowAttackState = 0;
+	MaxAttackState = 0;
+}
 
-	static ConstructorHelpers::FObjectFinder<UDDStateDrivenAttackData> DataAssetRef(TEXT("/Script/DragDown.DDStateDrivenAttackData'/Game/Blueprint/DataAsset/DDDA_DirevenAttackData.DDDA_DirevenAttackData'"));
+void UDDAttackStateComponent::BeginPlay()
+{
+	Super::BeginPlay();
 
-	if ( DataAssetRef.Succeeded() )
+	if (StateDrivenAttackData)
 	{
-		StateDrivenAttackData = DataAssetRef.Object;
-		MaxAttackState = DataAssetRef.Object.Get()->MaxStateCount;
+		MaxAttackState = StateDrivenAttackData->MaxStateCount;
 	}
 }
 
 void UDDAttackStateComponent::PlusAttackState()
 {
+	if (MaxAttackState == 0)
+	{
+		UE_LOG(LogDD, Error, TEXT("UDDAttackStateComponent::PlusAttackState - Divide by Zero"));
+	}
+
 	NowAttackState = (NowAttackState + 1) % MaxAttackState;
 }
 

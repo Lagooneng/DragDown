@@ -9,7 +9,8 @@
 UENUM()
 enum class EMESHID : uint32
 {
-	MERCC = 1
+	MERC = 1,
+	DRESS = 2
 };
 
 /**
