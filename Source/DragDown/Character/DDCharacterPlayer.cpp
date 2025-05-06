@@ -127,7 +127,7 @@ void ADDCharacterPlayer::SetData()
 	GetMesh()->SetAnimInstanceClass(Data->CharacterPlayerData.AnimInstance);
 	GetMesh()->SetRelativeLocation(Data->CharacterPlayerData.MeshLocation);
 	GetMesh()->SetRelativeRotation(Data->CharacterPlayerData.MeshRotation);
-	MeshManagerComponent->SetMergedMesh(EMESHID::DEMONF_01);
+	MeshManagerComponent->SetMergedMesh(EMESHID::DEMONM_01);
 	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] SetData - Mesh Z Pos : %f"), GetWorld()->GetNetMode(), GetMesh()->GetRelativeLocation().Z);
 }
 

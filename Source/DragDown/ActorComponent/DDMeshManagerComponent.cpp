@@ -26,6 +26,12 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 		return;
 	}
 
+	if (MeshDatas->Meshes.Find(MeshID)->Get() == nullptr)
+	{
+		UE_LOG(LogDD, Warning, TEXT("Invalid Mesh Data"));
+		return;
+	}
+
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 
 	if ( MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge.Num() > 2)
