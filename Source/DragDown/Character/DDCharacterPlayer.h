@@ -64,16 +64,16 @@ protected:
 
 // GAS Section
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UDDGASManagerComponent> GASManagerComponent;
 
 // Buff
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UDDBuffManagerComponent> BuffManagerComponent;
 
 // Surface Detection
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
 };

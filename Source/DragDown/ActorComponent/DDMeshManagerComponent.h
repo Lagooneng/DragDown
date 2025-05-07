@@ -15,11 +15,15 @@ class DRAGDOWN_API UDDMeshManagerComponent : public UActorComponent
 
 public:	
 	UDDMeshManagerComponent();
-
+	
+	void LoadCachedMesh();
 	void SetMergedMesh(EMESHID MeshID);
 	void SetHairMesh(EMESHID MeshID);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UDDMeshDatas> MeshDatas;
+
+	UPROPERTY(Config)
+	EMESHID MeshIDCache;
 };

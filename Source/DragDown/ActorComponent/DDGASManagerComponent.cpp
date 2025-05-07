@@ -15,18 +15,6 @@ UDDGASManagerComponent::UDDGASManagerComponent()
 	SetIsReplicatedByDefault(true);
 
 	ASC = nullptr;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionPushingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Pushing.IA_Pushing'"));
-	if (nullptr != InputActionPushingRef.Object)
-	{
-		PushingAction = InputActionPushingRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionDodgeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Dodge.IA_Dodge'"));
-	if (nullptr != InputActionDodgeRef.Object)
-	{
-		DodgeAction = InputActionDodgeRef.Object;
-	}
 }
 
 UAbilitySystemComponent* UDDGASManagerComponent::GetAbilitySystemComponent() const
