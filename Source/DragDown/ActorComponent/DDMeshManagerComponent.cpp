@@ -11,6 +11,14 @@
 
 UDDMeshManagerComponent::UDDMeshManagerComponent()
 {
+	MeshIDCache = EMESHID::NONE;
+	LoadConfig(); 
+}
+
+void UDDMeshManagerComponent::LoadCachedMesh()
+{
+	LoadConfig();
+	SetMergedMesh(MeshIDCache); 
 }
 
 void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
@@ -20,6 +28,7 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 		UE_LOG(LogDD, Warning, TEXT("No Meshes Data"));
 		return;
 	}
+
 	if (!MeshDatas->Meshes.Contains(MeshID))
 	{
 		UE_LOG(LogDD, Warning, TEXT("Invalid MeshID : %s, %d"), *UEnum::GetValueAsString(MeshID), MeshID);
@@ -58,6 +67,13 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 	}
 
 	SetHairMesh(MeshID);
+
+	if (MeshID != EMESHID::NONE)
+	{
+		UE_LOG(LogDD, Log, TEXT("SetMergedMesh Caching - %s"), *UEnum::GetValueAsString(MeshID));
+		MeshIDCache = MeshID;
+		SaveConfig();
+	}
 }
 
 void UDDMeshManagerComponent::SetHairMesh(EMESHID MeshID)
