@@ -22,7 +22,7 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 	}
 	if (!MeshDatas->Meshes.Contains(MeshID))
 	{
-		UE_LOG(LogDD, Warning, TEXT("Invalid MeshID"));
+		UE_LOG(LogDD, Warning, TEXT("Invalid MeshID : %s, %d"), *UEnum::GetValueAsString(MeshID), MeshID);
 		return;
 	}
 
@@ -44,7 +44,7 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 		MergeParams.bNeedsCpuAccess = true;
 
 		USkeletalMesh* MergedMesh = USkeletalMergingLibrary::MergeMeshes(MergeParams);
-		//MergedMesh->SetPhysicsAsset(MeshDatas->Meshes.Find(MeshID)->Get()->PhysicsAsset);
+		MergedMesh->SetPhysicsAsset(MeshDatas->Meshes.Find(MeshID)->Get()->PhysicsAsset);
 		Character->GetMesh()->SetSkeletalMesh(MergedMesh);
 	}
 	if (MeshDatas->Meshes.Find(MeshID)->Get()->MeshesToMerge.Num() == 1)
@@ -62,10 +62,6 @@ void UDDMeshManagerComponent::SetMergedMesh(EMESHID MeshID)
 
 void UDDMeshManagerComponent::SetHairMesh(EMESHID MeshID)
 {
-	if (MeshDatas->Meshes.Find(MeshID)->Get()->HairMesh == nullptr)
-	{
-		return;
-	}
 	ADDCharacterBase* CharacterBase = Cast<ADDCharacterBase>(GetOwner());
 
 	if ( CharacterBase )

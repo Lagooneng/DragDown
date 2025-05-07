@@ -6,38 +6,35 @@
 #include "Engine/DataAsset.h"
 #include "DDMeshDatas.generated.h"
 
-UENUM()
-enum class EMESHID : uint32
+UENUM(BlueprintType)
+enum class EMESHID : uint8
 {
-	MERCF_01 = 101,
-	MERCF_02 = 102,
-	MERCF_03 = 103,
-	MERCF_04 = 104,
-	MERCM_01 = 201,
-	MERCM_02 = 202,
-	MERCM_03 = 203,
-	MERCM_04 = 204,
-	DRESS_01 = 301,
-	DRESS_02 = 302,
-	DRESS_03 = 303,
-	DRESS_04 = 304,
-	DEMONF_01 = 401,
-	DEMONF_02 = 402,
-	DEMONF_03 = 403,
-	DEMONF_04 = 404,
-	DEMONM_01 = 501,
-	DEMONM_02 = 502,
-	DEMONM_03 = 503,
-	DEMONM_04 = 504,
-	ASSASSIN_01 = 601,
-	ASSASSIN_02 = 602,
-	ASSASSIN_03 = 603,
-	ASSASSIN_04 = 604,
-	SKELETON_01 = 701,
-	SKELETON_02 = 702,
-	SKELETON_03 = 703,
-	SKELETON_04 = 704,
-	ARDEN_01 = 801
+	NONE = 0		UMETA(DisplayName = "None"),
+	MERCF_01		UMETA(DisplayName = "Mercenary Female 01"),
+	MERCF_02		UMETA(DisplayName = "Mercenary Female 02"),
+	MERCF_03		UMETA(DisplayName = "Mercenary Female 03"),
+	MERCF_04		UMETA(DisplayName = "Mercenary Female 04"),
+	MERCM_01		UMETA(DisplayName = "Mercenary Male 01"),
+	MERCM_02		UMETA(DisplayName = "Mercenary Male 02"),
+	MERCM_03		UMETA(DisplayName = "Mercenary Male 03"),
+	MERCM_04		UMETA(DisplayName = "Mercenary Male 04"),
+	DRESS_01		UMETA(DisplayName = "Dress 01"),
+	DRESS_02		UMETA(DisplayName = "Dress 02"),
+	DRESS_03		UMETA(DisplayName = "Dress 03"),
+	DRESS_04		UMETA(DisplayName = "Dress 04"),
+	DEMONF_01		UMETA(DisplayName = "Demon Female 01"),
+	DEMONF_02		UMETA(DisplayName = "Demon Female 02"),
+	DEMONF_03		UMETA(DisplayName = "Demon Female 03"),
+	DEMONF_04		UMETA(DisplayName = "Demon Female 04"),
+	DEMONM_01		UMETA(DisplayName = "Demon Male 01"),
+	DEMONM_02		UMETA(DisplayName = "Demon Male 02"),
+	DEMONM_03		UMETA(DisplayName = "Demon Male 03"),
+	DEMONM_04		UMETA(DisplayName = "Demon Male 04"),
+	ASSASSIN_01		UMETA(DisplayName = "Assassin 01"),
+	ASSASSIN_02		UMETA(DisplayName = "Assassin 02"),
+	ASSASSIN_03		UMETA(DisplayName = "Assassin 03"),
+	ASSASSIN_04		UMETA(DisplayName = "Assassin 04"),
+	ARDEN_01		UMETA(DisplayName = "Arden 01")
 };
 
 /**
