@@ -11,6 +11,12 @@ ADDPlayerController::ADDPlayerController()
 	bIsMenuOpen = false;
 }
 
+void ADDPlayerController::BeginPlay()
+{
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+}
+
 void ADDPlayerController::BeginPlayingState()
 {
 	Super::BeginPlayingState();

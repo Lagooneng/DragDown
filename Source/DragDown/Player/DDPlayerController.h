@@ -16,6 +16,7 @@ class DRAGDOWN_API ADDPlayerController : public APlayerController
 	
 public:
 	ADDPlayerController();
+	virtual void BeginPlay();
 
 protected:
 	virtual void BeginPlayingState() override;
