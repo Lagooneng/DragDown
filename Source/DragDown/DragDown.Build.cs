@@ -13,7 +13,7 @@ public class DragDown : ModuleRules
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "InputCore", "NavigationSystem", "UMG",
 															"HTTP", "Json", "JsonUtilities", "PhysicsCore", "DLSS", "DLSSBlueprint", "SkeletalMerging",
-															"EditorScriptingUtilities"});
+															"Sockets", "Networking"});
 
         PrivateDependencyModuleNames.AddRange(new string[]
         {
