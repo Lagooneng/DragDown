@@ -6,10 +6,10 @@
 UDDUserAuthSubsystem::UDDUserAuthSubsystem()
 {
 	ClearSession();
+	UserName = DefaultName;
 }
 
 void UDDUserAuthSubsystem::ClearSession()
 {
 	Token.Empty();
-	UserName.Empty();
 }

@@ -4,6 +4,8 @@
 #include "Player/DDPlayerController.h"
 #include "UI/DDGASStaminabarUserWidget.h"
 #include "AbilitySystemComponent.h"
+#include "Game/DDGameState.h"
+#include "Subsystem/DDUserAuthSubsystem.h"
 #include "DragDown.h"
 
 ADDPlayerController::ADDPlayerController()
@@ -24,6 +26,7 @@ void ADDPlayerController::BeginPlayingState()
 	if (IsLocalController())
 	{
 		InitGASWidget();
+		SetUserName();
 	}
 }
 
@@ -32,6 +35,40 @@ void ADDPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ADDPlayerController::ToggleMenu);
+}
+
+void ADDPlayerController::HandleSetUserName(const FString& InUserName)
+{
+	if ( !HasAuthority() ) return;
+
+	ADDGameState* GameState = Cast<ADDGameState>( GetWorld()->GetGameState() );
+	if ( GameState )
+	{
+		GameState->AddPlayer(InUserName);
+		UE_LOG(LogDD, Log, TEXT("[NetMode: %d] ADDPlayerController::HandleSetUserName - %s"), GetWorld()->GetNetMode(), *InUserName);
+	}
+}
+
+void ADDPlayerController::SetUserName()
+{
+	UDDUserAuthSubsystem* UserAuthSubsystem = GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>();
+
+	if ( HasAuthority() )
+	{
+		HandleSetUserName(UserAuthSubsystem->GetUserName());
+	}
+	else
+	{
+		ServerSetUserName(UserAuthSubsystem->GetUserName());
+	}
+}
+
+void ADDPlayerController::ServerSetUserName_Implementation(const FString& InUserName)
+{
+	if ( HasAuthority() )
+	{
+		HandleSetUserName(InUserName);
+	}
 }
 
 void ADDPlayerController::InitGASWidget()

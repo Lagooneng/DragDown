@@ -22,6 +22,14 @@ protected:
 	virtual void BeginPlayingState() override;
 	virtual void SetupInputComponent() override;
 
+// User Init
+protected:
+	void HandleSetUserName(const FString& InUserName);
+	void SetUserName();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerSetUserName(const FString& InUserName);
+
 // GAS Widget
 protected:
 	void InitGASWidget();
