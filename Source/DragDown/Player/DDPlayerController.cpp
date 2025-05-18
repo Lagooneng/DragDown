@@ -17,6 +17,11 @@ void ADDPlayerController::BeginPlay()
 {
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
+
+	if ( HasAuthority() )
+	{
+
+	}
 }
 
 void ADDPlayerController::BeginPlayingState()

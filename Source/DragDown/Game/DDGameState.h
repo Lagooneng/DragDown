@@ -6,15 +6,7 @@
 #include "GameFramework/GameState.h"
 #include "DDGameState.generated.h"
 
-USTRUCT()
-struct FPlayerReadyStruct
-{
-	GENERATED_BODY()
-
-	TArray<FString> PlayerNames;
-
-	TMap<FString, bool> PlayerReadyStates;
-};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerReadyChanged);
 
 /**
  * 
@@ -25,15 +17,30 @@ class DRAGDOWN_API ADDGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
+	FPlayerReadyChanged OnPlayerReadyChanged;
+
 	void AddPlayer(const FString& UserName);
 
-	void SetPlayerReady(const FString& UserName, bool bIsReady);
+	int32 GetPlayerIdx(const FString& UserName);
 
-	FORCEINLINE FPlayerReadyStruct GetPlayerReadyStruct() { return PlayerReadyStruct; }
+	const TArray<FString>& GetPlayerNames() { return PlayerNames; }
+	const TArray<bool>& GetPlayerReadyStates() { return PlayerReadyStates; }
+
+	void SetPlayerReady(int32 PlayerIdx, bool bIsReady);
+
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+// TMap is not replicated
+// Array Index is Player's Idx
+protected:
 	UPROPERTY(Replicated)
-	FPlayerReadyStruct PlayerReadyStruct;
+	TArray< FString > PlayerNames;
+
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerReadyStates)
+	TArray< bool > PlayerReadyStates;
+
+	UFUNCTION()
+	void OnRep_PlayerReadyStates();
 };

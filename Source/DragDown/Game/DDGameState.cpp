@@ -7,28 +7,54 @@
 
 void ADDGameState::AddPlayer(const FString& UserName)
 {
-	if ( !PlayerReadyStruct.PlayerNames.Find(UserName) )
+	UE_LOG(LogDD, Log, TEXT("ADDGameState - AddPlayer"));
+
+	for ( const FString& PlayerName : PlayerNames )
 	{
-		PlayerReadyStruct.PlayerNames.Emplace(UserName); 
+		if ( PlayerName == UserName )
+		{
+			return;
+		}
 	}
 
-	if ( !PlayerReadyStruct.PlayerReadyStates.Find(UserName) )
-	{
-		PlayerReadyStruct.PlayerReadyStates.Emplace(UserName, false);
-	}
+	PlayerNames.Emplace(UserName);
+	PlayerReadyStates.Emplace(false);
+
+	OnPlayerReadyChanged.Broadcast();
 }
 
-void ADDGameState::SetPlayerReady(const FString& UserName, bool bIsReady)
+int32 ADDGameState::GetPlayerIdx(const FString& UserName)
 {
-	if ( PlayerReadyStruct.PlayerReadyStates.Find(UserName) )
+	int32 Length = PlayerNames.Num();
+
+	for (int32 i = 0; i < Length; ++i)
 	{
-		PlayerReadyStruct.PlayerReadyStates[UserName] = bIsReady;
+		if ( PlayerNames[i] == UserName)
+		{
+			return i;
+		}
 	}
+
+	return -1;
+}
+
+void ADDGameState::SetPlayerReady(int32 PlayerIdx, bool bIsReady)
+{
+	PlayerReadyStates[PlayerIdx] = bIsReady;
+
+	OnPlayerReadyChanged.Broadcast();
 }
 
 void ADDGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ADDGameState, PlayerReadyStruct);
+	DOREPLIFETIME(ADDGameState, PlayerNames);
+	DOREPLIFETIME(ADDGameState, PlayerReadyStates);
+}
+
+void ADDGameState::OnRep_PlayerReadyStates()
+{
+	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] OnRep_PlayerReadyStruct"), GetWorld()->GetNetMode());
+	OnPlayerReadyChanged.Broadcast();
 }

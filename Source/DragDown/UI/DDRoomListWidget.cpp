@@ -31,7 +31,5 @@ void UDDRoomListWidget::SetRoomList(TArray<FRoomSummary> RoomSummries)
 		
 		VerticalBox->AddChild(EntryWidget);
 		EntryWidget->SetRoomEntryWidget(RoomSummary);
-		EntryWidget->Padding = 5.0f;
-		
 	}
 }
