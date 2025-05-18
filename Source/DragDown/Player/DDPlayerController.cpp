@@ -11,17 +11,18 @@
 ADDPlayerController::ADDPlayerController()
 {
 	bIsMenuOpen = false;
+	PlayerIdx = -1;
 }
 
 void ADDPlayerController::BeginPlay()
 {
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
+	Super::BeginPlay();
 
-	if ( HasAuthority() )
+	if ( GameState == nullptr )
 	{
-
+		GameState = Cast<ADDGameState>(GetWorld()->GetGameState());
 	}
+
 }
 
 void ADDPlayerController::BeginPlayingState()
@@ -30,6 +31,11 @@ void ADDPlayerController::BeginPlayingState()
 
 	if (IsLocalController())
 	{
+		if (GameState == nullptr)
+		{
+			GameState = Cast<ADDGameState>(GetWorld()->GetGameState());
+		}
+
 		InitGASWidget();
 		SetUserName();
 	}
@@ -46,11 +52,14 @@ void ADDPlayerController::HandleSetUserName(const FString& InUserName)
 {
 	if ( !HasAuthority() ) return;
 
-	ADDGameState* GameState = Cast<ADDGameState>( GetWorld()->GetGameState() );
 	if ( GameState )
 	{
-		GameState->AddPlayer(InUserName);
-		UE_LOG(LogDD, Log, TEXT("[NetMode: %d] ADDPlayerController::HandleSetUserName - %s"), GetWorld()->GetNetMode(), *InUserName);
+		PlayerIdx = GameState->AddPlayer(InUserName); 
+		UE_LOG(LogDD, Log, TEXT("[NetMode: %d] ADDPlayerController::HandleSetUserName - %s, %d"), GetWorld()->GetNetMode(), *InUserName, PlayerIdx);
+	}
+	else
+	{
+		UE_LOG(LogDD, Error, TEXT("[NetMode: %d] GameState is null"), GetWorld()->GetNetMode());
 	}
 }
 
@@ -70,7 +79,7 @@ void ADDPlayerController::SetUserName()
 
 void ADDPlayerController::ServerSetUserName_Implementation(const FString& InUserName)
 {
-	if ( HasAuthority() )
+	if (HasAuthority())
 	{
 		HandleSetUserName(InUserName);
 	}
@@ -78,9 +87,9 @@ void ADDPlayerController::ServerSetUserName_Implementation(const FString& InUser
 
 void ADDPlayerController::InitGASWidget()
 {
-	UE_LOG(LogDD, Log, TEXT("InitGASWidget Start"));
+	//UE_LOG(LogDD, Log, TEXT("InitGASWidget Start"));
 	if ( StaminaBarWidgetClass == nullptr || StaminaBarWidget != nullptr) return;
-	UE_LOG(LogDD, Log, TEXT("InitGASWidget Start - 2"));
+	//UE_LOG(LogDD, Log, TEXT("InitGASWidget Start - 2"));
 	StaminaBarWidget = CreateWidget<UDDGASStaminaBarUserWidget>(this, StaminaBarWidgetClass);
 
 	if (StaminaBarWidget == nullptr)
@@ -100,8 +109,6 @@ void ADDPlayerController::InitGASWidget()
 
 	StaminaBarWidget->SetOwner(ControlledPawn);
     StaminaBarWidget->SetAbilitySystemComponent(ControlledPawn);
-
-    
 }
 
 void ADDPlayerController::ToggleMenu()
@@ -131,8 +138,8 @@ void ADDPlayerController::CloseMenu()
 		MenuWidget->RemoveFromParent();
 	}
 
-	FInputModeGameOnly InputMode;
+	/*FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
-	bShowMouseCursor = false;
+	bShowMouseCursor = false;*/
 	bIsMenuOpen = false;
 }

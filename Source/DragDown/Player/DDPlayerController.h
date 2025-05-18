@@ -22,6 +22,7 @@ protected:
 	virtual void BeginPlayingState() override;
 	virtual void SetupInputComponent() override;
 
+
 // User Init
 protected:
 	void HandleSetUserName(const FString& InUserName);
@@ -29,6 +30,9 @@ protected:
 	
 	UFUNCTION(Server, Reliable)
 	void ServerSetUserName(const FString& InUserName);
+
+	TObjectPtr<class ADDGameState> GameState;
+	int32 PlayerIdx;
 
 // GAS Widget
 protected:
@@ -45,7 +49,7 @@ protected:
 public:
 	void ToggleMenu();
 	void OpenMenu();
-	void CloseMenu();
+	virtual void CloseMenu();
 
 	// UMG 위젯 클래스 (블루프린트에서 설정)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")

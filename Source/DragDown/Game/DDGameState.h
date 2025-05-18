@@ -19,7 +19,7 @@ class DRAGDOWN_API ADDGameState : public AGameState
 public:
 	FPlayerReadyChanged OnPlayerReadyChanged;
 
-	void AddPlayer(const FString& UserName);
+	int32 AddPlayer(const FString& UserName);
 
 	int32 GetPlayerIdx(const FString& UserName);
 

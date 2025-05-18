@@ -5,15 +5,17 @@
 #include "Net/UnrealNetwork.h"
 #include "DragDown.h"
 
-void ADDGameState::AddPlayer(const FString& UserName)
+int32 ADDGameState::AddPlayer(const FString& UserName)
 {
+	int32 Idx = 0;
 	UE_LOG(LogDD, Log, TEXT("ADDGameState - AddPlayer"));
 
 	for ( const FString& PlayerName : PlayerNames )
 	{
+		++Idx;
 		if ( PlayerName == UserName )
 		{
-			return;
+			return Idx;
 		}
 	}
 
@@ -21,6 +23,8 @@ void ADDGameState::AddPlayer(const FString& UserName)
 	PlayerReadyStates.Emplace(false);
 
 	OnPlayerReadyChanged.Broadcast();
+
+	return Idx;
 }
 
 int32 ADDGameState::GetPlayerIdx(const FString& UserName)
@@ -40,9 +44,15 @@ int32 ADDGameState::GetPlayerIdx(const FString& UserName)
 
 void ADDGameState::SetPlayerReady(int32 PlayerIdx, bool bIsReady)
 {
-	PlayerReadyStates[PlayerIdx] = bIsReady;
-
-	OnPlayerReadyChanged.Broadcast();
+	if ( PlayerReadyStates.IsValidIndex(PlayerIdx) )
+	{
+		PlayerReadyStates[PlayerIdx] = bIsReady;
+		OnPlayerReadyChanged.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogDD, Error, TEXT("[NetMode: %d] ADDGameState::SetPlayerReady : %d"), GetWorld()->GetNetMode(), PlayerIdx);
+	}
 }
 
 void ADDGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
