@@ -11,18 +11,11 @@
 ADDPlayerController::ADDPlayerController()
 {
 	bIsMenuOpen = false;
-	PlayerIdx = -1;
 }
 
 void ADDPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if ( GameState == nullptr )
-	{
-		GameState = Cast<ADDGameState>(GetWorld()->GetGameState());
-	}
-
 }
 
 void ADDPlayerController::BeginPlayingState()
@@ -31,13 +24,7 @@ void ADDPlayerController::BeginPlayingState()
 
 	if (IsLocalController())
 	{
-		if (GameState == nullptr)
-		{
-			GameState = Cast<ADDGameState>(GetWorld()->GetGameState());
-		}
-
 		InitGASWidget();
-		SetUserName();
 	}
 }
 
@@ -46,43 +33,6 @@ void ADDPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ADDPlayerController::ToggleMenu);
-}
-
-void ADDPlayerController::HandleSetUserName(const FString& InUserName)
-{
-	if ( !HasAuthority() ) return;
-
-	if ( GameState )
-	{
-		PlayerIdx = GameState->AddPlayer(InUserName); 
-		UE_LOG(LogDD, Log, TEXT("[NetMode: %d] ADDPlayerController::HandleSetUserName - %s, %d"), GetWorld()->GetNetMode(), *InUserName, PlayerIdx);
-	}
-	else
-	{
-		UE_LOG(LogDD, Error, TEXT("[NetMode: %d] GameState is null"), GetWorld()->GetNetMode());
-	}
-}
-
-void ADDPlayerController::SetUserName()
-{
-	UDDUserAuthSubsystem* UserAuthSubsystem = GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>();
-
-	if ( HasAuthority() )
-	{
-		HandleSetUserName(UserAuthSubsystem->GetUserName());
-	}
-	else
-	{
-		ServerSetUserName(UserAuthSubsystem->GetUserName());
-	}
-}
-
-void ADDPlayerController::ServerSetUserName_Implementation(const FString& InUserName)
-{
-	if (HasAuthority())
-	{
-		HandleSetUserName(InUserName);
-	}
 }
 
 void ADDPlayerController::InitGASWidget()

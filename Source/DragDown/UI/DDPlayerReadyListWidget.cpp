@@ -3,21 +3,26 @@
 
 #include "UI/DDPlayerReadyListWidget.h"
 #include "Game/DDGameState.h"
+#include "Player/DDWaitingPlayerState.h"
 #include "UI/DDPlayerReadyEntryWidget.h"
 #include "Components/VerticalBox.h"
 #include "DragDown.h"
 
 void UDDPlayerReadyListWidget::NativeConstruct()
 {
+	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] NativeConstruct"), GetWorld()->GetNetMode());
 	GameState = Cast<ADDGameState>(GetWorld()->GetGameState());
 
-	UE_LOG(LogDD, Log, TEXT("UDDPlayerReadyListWidget NativeConstruct"));
 	if ( GameState )
 	{
-		GameState->OnPlayerReadyChanged.AddDynamic(this, &UDDPlayerReadyListWidget::UpdateReadyList);
+		GameState->OnGameInfoChanged.AddDynamic(this, &UDDPlayerReadyListWidget::UpdateReadyList);
 	}
 
-	UpdateReadyList();
+	if ( !GetWorld()->GetFirstPlayerController()->HasAuthority() )
+	{
+		UpdateReadyList();
+	}
+	//UpdateReadyList();
 }
 
 void UDDPlayerReadyListWidget::UpdateReadyList()
@@ -25,17 +30,15 @@ void UDDPlayerReadyListWidget::UpdateReadyList()
 	if ( VerticalBox == nullptr ) return;
 	if ( GameState == nullptr ) return;
 	
-	const TArray<FString>& PlayerNames = GameState->GetPlayerNames();
-	const TArray<bool>& PlayerReadyStates = GameState->GetPlayerReadyStates();
-	
-	int Length = PlayerNames.Num();
-
-	for (int32 i = 0; i < Length; i++)
+	for ( const auto& PS : GameState->PlayerArray )
 	{
-		if (EntryMap.Contains(PlayerNames[i]))
+		ADDWaitingPlayerState* WaitingDDPS = Cast<ADDWaitingPlayerState>(PS);
+		if (WaitingDDPS == nullptr) return;
+
+		if ( EntryMap.Contains( WaitingDDPS->GetUserName() ) )
 		{
-			bool bIsReady = PlayerReadyStates[i];
-			EntryMap[ PlayerNames[i] ]->UpdateReadyEntry(bIsReady);
+			bool bIsReady = WaitingDDPS->IsUserReady();
+			EntryMap[WaitingDDPS->GetUserName()]->UpdateReadyEntry(bIsReady);
 		}
 		else
 		{
@@ -49,9 +52,9 @@ void UDDPlayerReadyListWidget::UpdateReadyList()
 			if (EntryWidget == nullptr) return;
 
 			VerticalBox->AddChild(EntryWidget);
-			EntryWidget->InitReadyEntry( PlayerNames[i] );
+			EntryWidget->InitReadyEntry(WaitingDDPS->GetUserName());
 
-			EntryMap.Emplace(PlayerNames[i], EntryWidget);
+			EntryMap.Emplace(WaitingDDPS->GetUserName(), EntryWidget);
 		}
 	}
 }

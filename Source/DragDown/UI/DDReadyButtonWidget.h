@@ -28,7 +28,7 @@ protected:
 	TObjectPtr<class UTextBlock> TxtReady;
 
 	UPROPERTY()
-	TObjectPtr<class ADDWatingPlayerController> PC;
+	TObjectPtr<class ADDWaitingPlayerController> PC;
 
 	bool bIsReady;
 

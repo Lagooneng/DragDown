@@ -3,68 +3,26 @@
 
 #include "Game/DDGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/DDPlayerState.h"
 #include "DragDown.h"
 
-int32 ADDGameState::AddPlayer(const FString& UserName)
+void ADDGameState::AddPlayerState(APlayerState* PlayerState)
 {
-	int32 Idx = 0;
-	UE_LOG(LogDD, Log, TEXT("ADDGameState - AddPlayer"));
+	Super::AddPlayerState(PlayerState);
+	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] ADDGameState::AddPlayerState, %d"), GetWorld()->GetNetMode(), PlayerArray.Num());
 
-	for ( const FString& PlayerName : PlayerNames )
+	for ( const auto& PS : PlayerArray )
 	{
-		++Idx;
-		if ( PlayerName == UserName )
+		if ( ADDPlayerState* DDPS = Cast<ADDPlayerState>(PS) )
 		{
-			return Idx;
+			DDPS->OnPlayerInfoChanged.Clear();
+			DDPS->OnPlayerInfoChanged.AddDynamic(this, &ADDGameState::OnPlayerInfoChangedCallback);
 		}
 	}
-
-	PlayerNames.Emplace(UserName);
-	PlayerReadyStates.Emplace(false);
-
-	OnPlayerReadyChanged.Broadcast();
-
-	return Idx;
 }
 
-int32 ADDGameState::GetPlayerIdx(const FString& UserName)
+void ADDGameState::OnPlayerInfoChangedCallback()
 {
-	int32 Length = PlayerNames.Num();
-
-	for (int32 i = 0; i < Length; ++i)
-	{
-		if ( PlayerNames[i] == UserName)
-		{
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-void ADDGameState::SetPlayerReady(int32 PlayerIdx, bool bIsReady)
-{
-	if ( PlayerReadyStates.IsValidIndex(PlayerIdx) )
-	{
-		PlayerReadyStates[PlayerIdx] = bIsReady;
-		OnPlayerReadyChanged.Broadcast();
-	}
-	else
-	{
-		UE_LOG(LogDD, Error, TEXT("[NetMode: %d] ADDGameState::SetPlayerReady : %d"), GetWorld()->GetNetMode(), PlayerIdx);
-	}
-}
-
-void ADDGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ADDGameState, PlayerNames);
-	DOREPLIFETIME(ADDGameState, PlayerReadyStates);
-}
-
-void ADDGameState::OnRep_PlayerReadyStates()
-{
-	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] OnRep_PlayerReadyStruct"), GetWorld()->GetNetMode());
-	OnPlayerReadyChanged.Broadcast();
+	UE_LOG(LogDD, Log, TEXT("ADDGameState::OnPlayerInfoChangedCallback"));
+	OnGameInfoChanged.Broadcast();
 }
