@@ -29,6 +29,12 @@ ADDCharacterBase::ADDCharacterBase()
 	HairSKMComponent->SetupAttachment(GetMesh());
 
 	bIsActionEnabled = true;
+
+	// Trigger
+	Trigger = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger"));
+	Trigger->SetupAttachment(RootComponent);
+	Trigger->InitCapsuleSize(50.0f, 100.0f);
+	Trigger->SetCollisionProfileName(CPROFILE_OVERLAPALL);
 }
 
 void ADDCharacterBase::ClientSetActionEnabled_Implementation(bool bInActionEnabled)
@@ -55,6 +61,11 @@ void ADDCharacterBase::Jump()
 	if (!bIsActionEnabled) return;
 
 	Super::Jump();
+}
+
+UCapsuleComponent* ADDCharacterBase::GetTrigger()
+{
+	return Trigger;
 }
 
 void ADDCharacterBase::NetMulticastPlayOtherClientMontage_Implementation(UAnimMontage* Montage, FName SectionName)

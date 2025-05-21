@@ -2,10 +2,9 @@
 
 
 #include "UI/DDReadyButtonWidget.h"
-#include "Game/DDGameState.h"
-#include "Player/DDWaitingPlayerController.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Player/DDWaitingPlayerState.h"
 
 void UDDReadyButtonWidget::NativeConstruct()
 {
@@ -13,7 +12,12 @@ void UDDReadyButtonWidget::NativeConstruct()
 
 	bIsReady = false;
 
-	PC = Cast<ADDWaitingPlayerController>(GetWorld()->GetFirstPlayerController());
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+	if ( PC )
+	{
+		WatingPS = PC->GetPlayerState<ADDWaitingPlayerState>();
+	}
 
 	if ( BtnReady )
 	{
@@ -28,11 +32,11 @@ void UDDReadyButtonWidget::NativeConstruct()
 
 void UDDReadyButtonWidget::OnReadyButtonClick()
 {
-	/*if ( PC )
+	if ( WatingPS )
 	{
 		bIsReady = !bIsReady;
 
-		PC->SetUserReady(bIsReady);
+		WatingPS->SetUserReady(bIsReady);
 	}
 
 	if ( TxtReady )
@@ -45,5 +49,5 @@ void UDDReadyButtonWidget::OnReadyButtonClick()
 		{
 			TxtReady->SetText(FText::FromString( NotReadyStatement ));
 		}
-	}*/
+	}
 }

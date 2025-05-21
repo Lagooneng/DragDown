@@ -43,4 +43,11 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<USkeletalMeshComponent> HairSKMComponent;
+
+// Trigger Section
+public:
+	class UCapsuleComponent* GetTrigger();
+
+protected:
+	TObjectPtr<class UCapsuleComponent> Trigger;
 };
