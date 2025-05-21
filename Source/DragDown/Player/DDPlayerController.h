@@ -37,7 +37,7 @@ protected:
 public:
 	void ToggleMenu();
 	void OpenMenu();
-	void CloseMenu();
+	virtual void CloseMenu();
 
 	// UMG 위젯 클래스 (블루프린트에서 설정)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")

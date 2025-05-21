@@ -14,10 +14,11 @@
 #include "ActorComponent/DDBuffManagerComponent.h"
 #include "ActorComponent/DDSurfaceDetectionComponent.h"
 #include "ActorComponent/DDGASManagerComponent.h"
+#include "ActorComponent/DDMeshManagerComponent.h"
+#include "ActorComponent/DDInteractionManagerComponent.h"
 #include "DataAsset/DDCharacterPlayerData.h"
 #include "DragDown.h"
 #include "DataAsset/DDMeshDatas.h"
-#include "ActorComponent/DDMeshManagerComponent.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -52,6 +53,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	SurfaceDetectionComponent = CreateDefaultSubobject<UDDSurfaceDetectionComponent>(TEXT("SurfaceDetectionComponent"));
 
 	GASManagerComponent = CreateDefaultSubobject<UDDGASManagerComponent>(TEXT("GASManagerComponent"));
+
+	InteractionManagerComponent = CreateDefaultSubobject<UDDInteractionManagerComponent>(TEXT("InteractionManagerComponent"));
 }
 
 void ADDCharacterPlayer::PossessedBy(AController* NewController)
@@ -85,6 +88,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::ShoulderLook); 
 
 	GASManagerComponent->SetupGASInputComponent();
+	InteractionManagerComponent->SetInteractionInputComponent();
 }
 
 void ADDCharacterPlayer::PreInitializeComponents()

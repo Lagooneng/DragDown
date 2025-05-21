@@ -211,8 +211,8 @@ void UDDHttpApiSubsystem::OnCreateRoomResponseReceived(FHttpRequestPtr Request, 
 		UE_LOG(LogDD, Log, TEXT("ResponseCode: %d"), ResponseCode);
 		UE_LOG(LogDD, Log, TEXT("ResponseContent: %s"), *ResponseContent);
 
-		GetWorld()->ServerTravel(TEXT("/Game/02_Level/L_Map_Game?game=/Game/01_Blueprint/Game/BP_DDGameMode.BP_DDGameMode_C?listen"));
-	}
+		GetWorld()->ServerTravel(TEXT("/Game/02_Level/L_WatingRoom?game=/Game/01_Blueprint/Game/BP_DDWatingMode.BP_DDWatingMode_C?listen"));
+	} 
 	else
 	{
 		FString Error = Response.IsValid() ? Response->GetContentAsString() : TEXT("Invalid Response");

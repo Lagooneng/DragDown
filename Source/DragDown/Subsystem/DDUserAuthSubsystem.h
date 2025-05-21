@@ -39,4 +39,6 @@ public:
 
 protected:
 	FString UserName;
+
+	const FString DefaultName = "Default Name";
 };

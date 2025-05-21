@@ -76,4 +76,9 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UDDSurfaceDetectionComponent> SurfaceDetectionComponent;
+
+// Interaction
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UDDInteractionManagerComponent> InteractionManagerComponent;
 };

@@ -7,6 +7,8 @@
 #include "AbilitySystemInterface.h"
 #include "DDPlayerState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerInfoChanged);
+
 /**
  * 
  */
@@ -20,10 +22,33 @@ public:
 
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	FPlayerInfoChanged OnPlayerInfoChanged;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = GAS)
 	TObjectPtr<class UAbilitySystemComponent> ASC;
 
 	UPROPERTY()
 	TObjectPtr<class UDDAttributeSet> AttributeSet;
+
+public:
+	FORCEINLINE const FString& GetUserName() { return UserName; }
+
+protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetUserName(const FString& InUserName);
+
+protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(ReplicatedUsing = OnRep_UserName)
+	FString UserName;
+
+	UFUNCTION()
+	void OnRep_UserName();
+
+
+
 };
