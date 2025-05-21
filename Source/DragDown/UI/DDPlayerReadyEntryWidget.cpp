@@ -14,6 +14,9 @@ void UDDPlayerReadyEntryWidget::InitReadyEntry(const FString& UserName)
 	if ( TxtReady )
 	{
 		TxtReady->SetText(FText::FromString(NotReadyStatement));
+
+		FSlateColor NewColor = FSlateColor(FLinearColor::Red);
+		TxtReady->SetColorAndOpacity(NewColor);
 	}
 }
 
@@ -24,10 +27,16 @@ void UDDPlayerReadyEntryWidget::UpdateReadyEntry(bool bIsReady)
 		if (bIsReady)
 		{
 			TxtReady->SetText(FText::FromString(ReadyStatement));
+
+			FSlateColor NewColor = FSlateColor(FLinearColor::Green);
+			TxtReady->SetColorAndOpacity(NewColor);
 		}
 		else
 		{
 			TxtReady->SetText(FText::FromString(NotReadyStatement));
+
+			FSlateColor NewColor = FSlateColor(FLinearColor::Red);
+			TxtReady->SetColorAndOpacity(NewColor);
 		}
 	}
 }
