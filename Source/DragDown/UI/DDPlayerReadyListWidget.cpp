@@ -22,7 +22,6 @@ void UDDPlayerReadyListWidget::NativeConstruct()
 	{
 		UpdateReadyList();
 	}
-	//UpdateReadyList();
 }
 
 void UDDPlayerReadyListWidget::UpdateReadyList()
