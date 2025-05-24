@@ -21,4 +21,6 @@ protected:
 	virtual void CloseMenu() override;
 
 	void ActivateGameInput();
+
+	virtual void OnChatCallback(const FText& Content) override;
 };

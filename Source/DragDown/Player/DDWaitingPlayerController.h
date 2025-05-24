@@ -17,6 +17,6 @@ class DRAGDOWN_API ADDWaitingPlayerController : public ADDPlayerController
 public:
 	virtual void BeginPlay() override;
 
-
+	virtual void OnChatCallback(const FText& Content) override;
 
 };

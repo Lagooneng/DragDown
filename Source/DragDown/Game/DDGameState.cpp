@@ -4,7 +4,17 @@
 #include "Game/DDGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/DDPlayerState.h"
+#include "Player/DDPlayerController.h"
 #include "DragDown.h"
+
+void ADDGameState::NetMulticastChatBroadCast_Implementation(const FText& UserName, const FText& Content)
+{
+	ADDPlayerController* PC = Cast<ADDPlayerController>(GetWorld()->GetFirstPlayerController());
+	if ( PC )
+	{
+		PC->UpdateChat(UserName, Content);
+	}
+}
 
 void ADDGameState::AddPlayerState(APlayerState* PlayerState)
 {

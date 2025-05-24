@@ -24,3 +24,10 @@ void ADDGamePlayerController::ActivateGameInput()
 	SetInputMode(InputMode); 
 	bShowMouseCursor = false; 
 }
+
+void ADDGamePlayerController::OnChatCallback(const FText& Content)
+{
+	Super::OnChatCallback(Content);
+
+	ActivateGameInput();
+}
