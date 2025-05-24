@@ -47,4 +47,25 @@ public:
 	TObjectPtr<class UUserWidget> MenuWidget;
 
 	bool bIsMenuOpen;
+
+// Chat
+public:
+	void UpdateChat(const FText& UserName, const FText& Content);
+
+protected:
+	void InitChatWidget();
+
+	void ActivateChatWidget();
+
+	UFUNCTION()
+	virtual void OnChatCallback(const FText& Content);
+
+	UFUNCTION(Server, Reliable)
+	void ServerOnChatCallback(const FText& UserName, const FText& Content);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> ChatBoxWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<class UDDChatBox> ChatBoxWidget;
 };

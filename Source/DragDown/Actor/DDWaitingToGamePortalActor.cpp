@@ -22,7 +22,7 @@ void ADDWaitingToGamePortalActor::Interact(AActor* InterActor)
 
 	if ( CanInteract(InterActor) )
 	{
-		GetWorld()->ServerTravel("L_Map_Game");
+		GetWorld()->ServerTravel("/Game/02_Level/L_Map_Game?game=/Game/01_Blueprint/Game/BP_DDGameMode.BP_DDGameMode_C?listen");
 	}
 }
 

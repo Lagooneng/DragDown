@@ -19,6 +19,9 @@ class DRAGDOWN_API ADDGameState : public AGameState
 public:
 	FGameInfoChanged OnGameInfoChanged;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastChatBroadCast(const FText& UserName, const FText& Content);
+
 protected:
 	virtual void AddPlayerState(APlayerState* PlayerState) override;
 

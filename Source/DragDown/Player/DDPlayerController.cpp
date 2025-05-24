@@ -3,6 +3,7 @@
 
 #include "Player/DDPlayerController.h"
 #include "UI/DDGASStaminabarUserWidget.h"
+#include "UI/DDChatBox.h"
 #include "AbilitySystemComponent.h"
 #include "Game/DDGameState.h"
 #include "Subsystem/DDUserAuthSubsystem.h"
@@ -25,6 +26,7 @@ void ADDPlayerController::BeginPlayingState()
 	if (IsLocalController())
 	{
 		InitGASWidget();
+		InitChatWidget();
 	}
 }
 
@@ -33,13 +35,13 @@ void ADDPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction("OpenMenu", IE_Pressed, this, &ADDPlayerController::ToggleMenu);
+	InputComponent->BindAction("Chat", IE_Pressed, this, &ADDPlayerController::ActivateChatWidget);
 }
 
 void ADDPlayerController::InitGASWidget()
 {
-	//UE_LOG(LogDD, Log, TEXT("InitGASWidget Start"));
 	if ( StaminaBarWidgetClass == nullptr || StaminaBarWidget != nullptr) return;
-	//UE_LOG(LogDD, Log, TEXT("InitGASWidget Start - 2"));
+
 	StaminaBarWidget = CreateWidget<UDDGASStaminaBarUserWidget>(this, StaminaBarWidgetClass);
 
 	if (StaminaBarWidget == nullptr)
@@ -88,8 +90,60 @@ void ADDPlayerController::CloseMenu()
 		MenuWidget->RemoveFromParent();
 	}
 
-	/*FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
-	bShowMouseCursor = false;*/
 	bIsMenuOpen = false;
+}
+
+void ADDPlayerController::UpdateChat(const FText& UserName, const FText& Content)
+{
+	ChatBoxWidget->MakeChatEntry(UserName, Content); 
+}
+
+void ADDPlayerController::InitChatWidget()
+{
+	if (ChatBoxWidgetClass == nullptr || ChatBoxWidget != nullptr) return;
+
+	ChatBoxWidget = CreateWidget<UDDChatBox>(this, ChatBoxWidgetClass);
+
+	if ( ChatBoxWidget == nullptr )
+	{
+		UE_LOG(LogDD, Log, TEXT("InitGASWidget: StaminaBarWidget Creation Is Failed"));
+		return;
+	}
+
+	ChatBoxWidget->AddToViewport(); 
+	ChatBoxWidget->OnChat.AddDynamic(this, &ADDPlayerController::OnChatCallback);
+}
+
+void ADDPlayerController::ActivateChatWidget()
+{
+	if ( ChatBoxWidget )
+	{
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
+		ChatBoxWidget->SetFocusToEditTxt();
+	}
+}
+
+void ADDPlayerController::OnChatCallback(const FText& Content)
+{
+	UE_LOG(LogDD, Log, TEXT("OnChatCallback - %s"), *Content.ToString());
+
+	if (!Content.IsEmpty())
+	{
+		FText UserName = FText::FromString(GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>()->GetUserName());
+
+		ServerOnChatCallback(UserName, Content); 
+	}
+}
+
+void ADDPlayerController::ServerOnChatCallback_Implementation(const FText& UserName, const FText& Content)
+{
+	if ( HasAuthority() )
+	{
+		ADDGameState* GameState = Cast<ADDGameState>(GetWorld()->GetGameState()); 
+		if (GameState) 
+		{
+			GameState->NetMulticastChatBroadCast(UserName, Content); 
+		}
+	}
 }
