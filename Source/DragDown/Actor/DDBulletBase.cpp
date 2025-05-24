@@ -73,6 +73,7 @@ void ADDBulletBase::OnReturnedToPool()
 {
 	if ( HasAuthority() )
 	{
+		GetWorld()->GetTimerManager().ClearTimer(PoolingTimer);
 		NetMulticastOnReturnedToPool();
 	}
 }
