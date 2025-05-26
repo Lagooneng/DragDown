@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character/DDCharacterBase.h"
-#include "AbilitySystemInterface.h"
 #include "InputActionValue.h"
 #include "DDCharacterPlayer.generated.h"
 
