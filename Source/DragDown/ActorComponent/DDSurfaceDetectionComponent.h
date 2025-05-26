@@ -29,6 +29,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<class UCharacterMovementComponent> CharacterMovementComp;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) 
 	TObjectPtr<class UDDGroundFrictionData> GroundFrictionData;
 };

@@ -11,12 +11,6 @@
 UDDSurfaceDetectionComponent::UDDSurfaceDetectionComponent()
 {
 	SetIsReplicatedByDefault(true);
-
-	static ConstructorHelpers::FObjectFinder<UDDGroundFrictionData> GroundFrictionDataRef(TEXT("/Script/DragDown.DDGroundFrictionData'/Game/Blueprint/DataAsset/DDDA_GroundFrictionData.DDDA_GroundFrictionData'"));
-	if (GroundFrictionDataRef.Succeeded())
-	{
-		GroundFrictionData = GroundFrictionDataRef.Object;
-	}
 }
 
 void UDDSurfaceDetectionComponent::BeginPlay()
