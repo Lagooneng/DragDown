@@ -8,6 +8,7 @@ Teck Stack
   - Network Object Pooling
 - DLSS
 - Skeletal Mesh Merging in Runtime
+- Chatting
 
 
 2025-1학기 단국대학교 캡스톤 디자인

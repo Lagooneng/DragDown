@@ -13,3 +13,12 @@ void ADDWaitingPlayerController::BeginPlay()
 	bShowMouseCursor = true;
 }
 
+void ADDWaitingPlayerController::OnChatCallback(const FText& Content)
+{
+	Super::OnChatCallback(Content);
+
+	FInputModeGameAndUI InputMode;
+	SetInputMode(InputMode);
+	bShowMouseCursor = true;
+}
+
