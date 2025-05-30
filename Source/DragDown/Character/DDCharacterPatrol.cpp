@@ -28,7 +28,6 @@ ADDCharacterPatrol::ADDCharacterPatrol()
 	PlayerSensor->SetRelativeLocation(FVector(700.0f, 0.0f, 130.0f));
 	PlayerSensor->OnComponentBeginOverlap.AddDynamic(this, &ADDCharacterPatrol::OnTriggerBeginOverlap);
 	PlayerSensor->OnComponentEndOverlap.AddDynamic(this, &ADDCharacterPatrol::OnTriggerEndOverlap);
-	PlayerSensor->bVisualizeComponent = true;
 
 	Power = 2000.0f;
 

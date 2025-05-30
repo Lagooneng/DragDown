@@ -83,7 +83,7 @@ void UDDMeshManagerComponent::SetHairMesh(EMESHID MeshID)
 	if ( CharacterBase )
 	{
 		CharacterBase->GetHairMeshComponent()->SetSkeletalMesh(MeshDatas->Meshes.Find(MeshID)->Get()->HairMesh);
-		CharacterBase->GetHairMeshComponent()->SetMasterPoseComponent(CharacterBase->GetMesh());
+		CharacterBase->GetHairMeshComponent()->SetLeaderPoseComponent(CharacterBase->GetMesh());
 	}
 }
 
