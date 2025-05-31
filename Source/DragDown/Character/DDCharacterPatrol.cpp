@@ -111,6 +111,19 @@ void ADDCharacterPatrol::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp
 		{
 			Cast<ADDAIController>(GetController())->ActiveMove(true); 
 			CharacterPlayer = nullptr;
+
+			ReSensing();
 		}
 	}
+}
+
+void ADDCharacterPatrol::ReSensing()
+{
+	PlayerSensor->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			PlayerSensor->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+	);
 }
