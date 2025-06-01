@@ -136,6 +136,30 @@ void ADDPlayerController::OnChatCallback(const FText& Content)
 	}
 }
 
+void ADDPlayerController::FadeIn(float FadeDuration)
+{
+	PlayerCameraManager->StartCameraFade(
+		1.0f,
+		0.0f,
+		FadeDuration,
+		FColor::Black,
+		false,
+		true
+	);
+}
+
+void ADDPlayerController::FadeOut(float FadeDuration)
+{
+	PlayerCameraManager->StartCameraFade(
+		0.0f,
+		1.0f,
+		FadeDuration,
+		FColor::Black,
+		false,
+		true
+	);
+}
+
 void ADDPlayerController::ServerOnChatCallback_Implementation(const FText& UserName, const FText& Content)
 {
 	if ( HasAuthority() )

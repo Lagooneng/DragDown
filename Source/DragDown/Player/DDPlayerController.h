@@ -68,4 +68,12 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UDDChatBox> ChatBoxWidget;
+
+// Fade
+public:
+	UFUNCTION(BlueprintCallable)
+	void FadeIn(float FadeDuration);
+
+	UFUNCTION(BlueprintCallable)
+	void FadeOut(float FadeDuration);
 };
