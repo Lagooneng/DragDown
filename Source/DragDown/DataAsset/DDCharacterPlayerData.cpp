@@ -13,6 +13,8 @@ UDDCharacterPlayerData::UDDCharacterPlayerData()
 	CharacterPlayerData.BrakingDecelerationWalking = 2000.f;
 
 	CharacterPlayerData.TargetArmLength = 400.0f;
+	CharacterPlayerData.CameraOffset = FVector();
+
 	CharacterPlayerData.MeshLocation = FVector(0.0f, 0.0f, -100.0f);
 	CharacterPlayerData.MeshRotation = FRotator(0.0f, -90.0f, 0.0f); 
 

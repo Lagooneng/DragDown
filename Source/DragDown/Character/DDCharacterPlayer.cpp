@@ -118,6 +118,7 @@ void ADDCharacterPlayer::SetData()
 	if (Data == nullptr) return;
 
 	CameraBoom->TargetArmLength = Data->CharacterPlayerData.TargetArmLength;
+	CameraBoom->SetRelativeLocation(Data->CharacterPlayerData.CameraOffset);
 
 	GetCharacterMovement()->RotationRate = Data->CharacterPlayerData.RotationRate;
 	GetCharacterMovement()->JumpZVelocity = Data->CharacterPlayerData.JumpZVelocity;
@@ -134,7 +135,7 @@ void ADDCharacterPlayer::SetData()
 
 	MeshManagerComponent->LoadCachedMesh();
 
-	UE_LOG(LogDD, Log, TEXT("[NetMode: %d] SetData - Mesh Z Pos : %f"), GetWorld()->GetNetMode(), GetMesh()->GetRelativeLocation().Z);
+	//UE_LOG(LogDD, Log, TEXT("[NetMode: %d] SetData - Mesh Z Pos : %f"), GetWorld()->GetNetMode(), GetMesh()->GetRelativeLocation().Z);
 }
 
 void ADDCharacterPlayer::OnRep_PlayerState()

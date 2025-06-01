@@ -14,4 +14,10 @@ class DRAGDOWN_API ADDPlayingGameState : public ADDGameState
 {
 	GENERATED_BODY()
 	
+public:
+	FORCEINLINE bool IsGameEnded() { return bIsGameEnded; };
+	FORCEINLINE void SetGameEnded(bool bInGameEnded) { bIsGameEnded = bInGameEnded; };
+
+protected:
+	bool bIsGameEnded;
 };

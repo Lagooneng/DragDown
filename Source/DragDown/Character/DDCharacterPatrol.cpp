@@ -69,7 +69,7 @@ FVector ADDCharacterPatrol::GetPatrolPos()
 
 	if (PatrolPoses.IsValidIndex(PrevIdx))
 	{
-		UE_LOG(LogDD, Log, TEXT("%d %d"), CurrentPatrolIdx, PatrolPosesLength);
+		//UE_LOG(LogDD, Log, TEXT("%d %d"), CurrentPatrolIdx, PatrolPosesLength);
 		return PatrolPoses[PrevIdx];
 	}
 	else

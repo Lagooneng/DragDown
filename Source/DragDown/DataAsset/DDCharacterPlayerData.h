@@ -32,6 +32,9 @@ struct FDDCharacterPlayerDataEntry
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	float TargetArmLength;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	FVector CameraOffset;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
 	TSubclassOf<class UAnimInstance> AnimInstance;
 
