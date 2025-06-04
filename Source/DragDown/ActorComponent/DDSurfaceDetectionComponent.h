@@ -15,6 +15,8 @@ class DRAGDOWN_API UDDSurfaceDetectionComponent : public UActorComponent
 public:	
 	UDDSurfaceDetectionComponent();
 
+	FORCEINLINE const EPhysicalSurface& GetCurrentPhysicalSurface() { return CurrentPhysicalSurface; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -31,4 +33,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly) 
 	TObjectPtr<class UDDGroundFrictionData> GroundFrictionData;
+
+	EPhysicalSurface CurrentPhysicalSurface;
 };
