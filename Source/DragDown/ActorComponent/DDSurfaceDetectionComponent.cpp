@@ -44,11 +44,15 @@ void UDDSurfaceDetectionComponent::OnMovementUpdated(float DeltaTime, FVector Ol
 		if (UPhysicalMaterial* PhysMat = Hit.PhysMaterial.Get())
 		{
 			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(PhysMat);
+			CurrentPhysicalSurface = SurfaceType;
 
 			switch (SurfaceType)
 			{
 			case SURFACE_ICE:
 				SetMovementForFriction(SURFACE_ICE);
+				break;
+			case SURFACE_SNOW:
+				SetMovementForFriction(SURFACE_SNOW);
 				break;
 			default:
 				SetMovementForFriction(SURFACE_DEFAULT);

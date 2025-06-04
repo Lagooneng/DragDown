@@ -27,6 +27,7 @@ void UDDUserSettings::ApplySettings(bool bForce)
 	SaveSettings();
 }
 
+
 void UDDUserSettings::SetMasterVolume(float InMasterVolume)
 {
 	MasterVolume = FMath::Clamp(InMasterVolume, 0.0f, 1.0f);

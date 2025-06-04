@@ -10,3 +10,4 @@
 
 #define SURFACE_DEFAULT SurfaceType_Default 
 #define SURFACE_ICE SurfaceType1
+#define SURFACE_SNOW SurfaceType2
