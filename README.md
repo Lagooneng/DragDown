@@ -132,8 +132,17 @@ DragDown/
 └── README.md                       # 프로젝트 개요 및 사용법
 ```
 
+# 5. 실행 방법
 
 
+# 6. 관련 링크
+## 시연 영상
+
+
+## 블로그
+[DragDown Blog](https://lagooneng.tistory.com/category/%EC%96%B8%EB%A6%AC%EC%96%BC%20%EC%97%94%EC%A7%84/Drag%20Down)
+
+## 백엔드 리포지토리
 [DragDown Spring boot Server GitHub Repository](https://github.com/Coffeecaat/DragDown)
 - Spring Boot
 - PostgreSQL
