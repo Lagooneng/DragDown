@@ -1,4 +1,4 @@
-![logo](Images/logo.png)
+<img src="Images/logo.png" alt="logo" width="200">
 
 2025-1학기 단국대학교 캡스톤 디자인
 
