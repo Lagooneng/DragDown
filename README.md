@@ -133,7 +133,18 @@ DragDown/
 ```
 
 # 5. 실행 방법
+## 5.1. 패키징된 파일이 있는 경우
+- exe 파일 실행
 
+## 5.2. Github에서 Clone하기
+### 5.2.1. Unreal Engine 5.5 설치
+- [설치](https://www.unrealengine.com/ko/download)
+
+### 5.2.2. Clone 후 uproject 나 Visual Studio에서 실행
+![start1](Images/start1.png)
+
+![start2-1](Images/start2-1.png)
+![start2-2](Images/start2-2.png)
 
 # 6. 관련 링크
 ## 시연 영상
