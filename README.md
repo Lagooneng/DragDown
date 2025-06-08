@@ -1,3 +1,5 @@
+![logo](Images/logo.png)
+
 2025-1학기 단국대학교 캡스톤 디자인
 
 # 1. Project Overview
@@ -142,9 +144,14 @@ DragDown/
 
 ### 5.2.2. Clone 후 uproject 나 Visual Studio에서 실행
 ![start1](Images/start1.png)
+- .uproject 더블클릭
 
+혹은
 ![start2-1](Images/start2-1.png)
+- Visual Studio를 켜고
+
 ![start2-2](Images/start2-2.png)
+- 실행하기
 
 # 6. 관련 링크
 ## 시연 영상
