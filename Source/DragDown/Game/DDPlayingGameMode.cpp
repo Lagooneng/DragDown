@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerState.h"
 #include "DDPlayingGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystem/DDHttpApiSubsystem.h"
 #include "DragDown.h"
 
 ADDPlayingGameMode::ADDPlayingGameMode()
@@ -23,7 +24,6 @@ void ADDPlayingGameMode::EndGame(APlayerState* PS)
 		return;
 	}
 
-	
 	GS->SetGameEnded(true);
 	
 	for ( APlayerState* PlayerState : GS->PlayerArray )
@@ -63,6 +63,12 @@ void ADDPlayingGameMode::Logout(AController* Exiting)
 		{
 			UE_LOG(LogDD, Log, TEXT("Server is not winner"));
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*NonWinnerMapName));
+		}
+
+		UDDHttpApiSubsystem* HttpSubsystem = GetGameInstance()->GetSubsystem<UDDHttpApiSubsystem>();
+		if (HttpSubsystem)
+		{
+			HttpSubsystem->SendLeaveRoomRequest(); 
 		}
 	}
 }

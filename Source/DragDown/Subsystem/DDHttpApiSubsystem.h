@@ -63,6 +63,7 @@ class DRAGDOWN_API UDDHttpApiSubsystem : public UGameInstanceSubsystem
 	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
@@ -90,6 +91,9 @@ public:
 	void SendJoinRoomRequest(const FString& RoomID, const FString& InIPAddress, int32 InPort);
 
 	UFUNCTION(BlueprintCallable, Category = "HTTP API")
+	void SendLeaveRoomRequest();
+
+	UFUNCTION(BlueprintCallable, Category = "HTTP API")
 	FString GetIP();
 
 	UFUNCTION(BlueprintCallable, Category = "HTTP API")
@@ -103,9 +107,13 @@ protected:
 	void OnCreateRoomResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnListRoomsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnJoinRoomResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
+	void OnLeaveRoomResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	FString	Address;
 	FString IP;
 	FString Port;
+
+protected:
+	FString ServerIP;
+	FString ServerPort;
 };

@@ -25,7 +25,7 @@ void UAnimNotify_Footstep::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	{
 		if ( USoundBase* Sound = SoundData[Surface] )
 		{
-			UE_LOG(LogDD, Log, TEXT("UAnimNotify_Footstep Notify USoundBase"));
+			//UE_LOG(LogDD, Log, TEXT("UAnimNotify_Footstep Notify USoundBase"));
 
 			UGameplayStatics::PlaySoundAtLocation(MeshComp->GetWorld(), Sound, Owner->GetActorLocation());
 		}
