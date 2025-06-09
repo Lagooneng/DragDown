@@ -15,11 +15,23 @@
 void UDDHttpApiSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	SetAddress();
+
+	const FString ConfigFilePath = FPaths::ProjectConfigDir() + TEXT("BackendServer.ini");
+	GConfig->GetString(TEXT("Server"), TEXT("ServerIP"), ServerIP, ConfigFilePath);
+	GConfig->GetString(TEXT("Server"), TEXT("ServerPort"), ServerPort, ConfigFilePath);
+}
+
+void UDDHttpApiSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+	SendLeaveRoomRequest(); 
 }
 
 void UDDHttpApiSubsystem::SendRegisterRequest(const FString& Username, const FString& Email, const FString& Password)
 {
-	FString Url = TEXT("http://localhost:8080/api/auth/register");
+	//FString Url = TEXT("http://localhost:8080/api/auth/register");
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/auth/register"), *ServerIP, *ServerPort);
 
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	JsonObject->SetStringField(TEXT("username"), Username);
@@ -41,7 +53,8 @@ void UDDHttpApiSubsystem::SendRegisterRequest(const FString& Username, const FSt
 
 void UDDHttpApiSubsystem::SendLoginRequest(const FString& Username, const FString& Password)
 {
-	FString Url = TEXT("http://localhost:8080/api/auth/login");
+	//FString Url = TEXT("http://localhost:8080/api/auth/login");
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/auth/login"), *ServerIP, *ServerPort);
 
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	JsonObject->SetStringField(TEXT("username"), Username);
@@ -62,7 +75,8 @@ void UDDHttpApiSubsystem::SendLoginRequest(const FString& Username, const FStrin
 
 void UDDHttpApiSubsystem::SendCreateRoomRequest(const FString& RoomName)
 {
-	FString Url = TEXT("http://localhost:8080/api/MatchRooms");
+	//FString Url = TEXT("http://localhost:8080/api/MatchRooms");
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/MatchRooms"), *ServerIP, *ServerPort);
 
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	JsonObject->SetStringField(TEXT("roomName"), RoomName);
@@ -89,7 +103,9 @@ void UDDHttpApiSubsystem::SendCreateRoomRequest(const FString& RoomName)
 
 void UDDHttpApiSubsystem::SendListRoomsRequest()
 {
-	FString Url = TEXT("http://localhost:8080/api/MatchRooms");
+	//FString Url = TEXT("http://localhost:8080/api/MatchRooms");
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/MatchRooms"), *ServerIP, *ServerPort);
+
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetVerb(TEXT("GET"));
@@ -97,6 +113,7 @@ void UDDHttpApiSubsystem::SendListRoomsRequest()
 
 	FString RawToken = GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>()->GetToken();
 	FString Bearer = FString::Printf(TEXT("Bearer %s"), *RawToken);
+	UE_LOG(LogDD, Log, TEXT("RawToken: %s"), *RawToken);
 	Request->SetHeader("Authorization", Bearer);
 
 	Request->OnProcessRequestComplete().BindUObject(this, &UDDHttpApiSubsystem::OnListRoomsResponseReceived);
@@ -105,7 +122,9 @@ void UDDHttpApiSubsystem::SendListRoomsRequest()
 
 void UDDHttpApiSubsystem::SendJoinRoomRequest(const FString& RoomID, const FString& InIPAddress, int32 InPort)
 {
-	FString Url = FString::Printf(TEXT("http://localhost:8080/api/MatchRooms/%s/join"), *RoomID);
+	//FString Url = FString::Printf(TEXT("http://localhost:8080/api/MatchRooms/%s/join"), *RoomID);
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/MatchRooms/%s/join"), *ServerIP, *ServerPort, *RoomID);
+
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetVerb(TEXT("POST"));
@@ -125,6 +144,25 @@ void UDDHttpApiSubsystem::SendJoinRoomRequest(const FString& RoomID, const FStri
 	Request->SetContentAsString(Body);
 
 	Request->OnProcessRequestComplete().BindUObject(this, &UDDHttpApiSubsystem::OnJoinRoomResponseReceived);
+	Request->ProcessRequest();
+}
+
+void UDDHttpApiSubsystem::SendLeaveRoomRequest()
+{
+	FString RawToken = GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>()->GetToken();
+	if (RawToken.IsEmpty()) return;
+
+	FString Url = FString::Printf(TEXT("http://%s:%s/api/MatchRooms/leave"), *ServerIP, *ServerPort);
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("DELETE"));
+	Request->SetHeader("Content-Type", "application/json");
+
+	FString Bearer = FString::Printf(TEXT("Bearer %s"), *RawToken);
+	Request->SetHeader("Authorization", Bearer);
+
+	Request->OnProcessRequestComplete().BindUObject(this, &UDDHttpApiSubsystem::OnLeaveRoomResponseReceived);
 	Request->ProcessRequest();
 }
 
@@ -306,8 +344,44 @@ void UDDHttpApiSubsystem::OnJoinRoomResponseReceived(FHttpRequestPtr Request, FH
 	}
 	else
 	{
-		UE_LOG(LogDD, Log, TEXT("Join Room Failed"));
+		UE_LOG(LogDD, Log, TEXT("Join Room Failed - %s"), *Response->GetContentAsString()); 
 	}
+}
+
+void UDDHttpApiSubsystem::OnLeaveRoomResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FResponseStruct ResponseStruct;
+	ResponseStruct.bWasSuccessful = bWasSuccessful;
+
+	if (bWasSuccessful && Response.IsValid())
+	{
+		int32 ResponseCode = Response->GetResponseCode();
+		FString ResponseContent = Response->GetContentAsString();
+		ResponseStruct.ResponseCode = ResponseCode;
+		ResponseStruct.ResponseContent = ResponseContent;
+
+		UE_LOG(LogDD, Log, TEXT("OnLeaveRoomResponseReceived - ResponseCode: %d"), ResponseCode);
+		UE_LOG(LogDD, Log, TEXT("OnLeaveRoomResponseReceived - ResponseContent: %s"), *ResponseContent);
+
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseContent);
+
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			FString Token = JsonObject->GetStringField(TEXT("token"));
+			GetGameInstance()->GetSubsystem<UDDUserAuthSubsystem>()->SetToken(Token);
+		}
+	}
+	else
+	{
+		FString Error = Response.IsValid() ? Response->GetContentAsString() : TEXT("Invalid Response");
+		ResponseStruct.ErrorContent = Error;
+
+		UE_LOG(LogDD, Error, TEXT("Request Failed: %s"), *Error);
+	}
+
+	// UnBind는 바인딩하는 쪽에서 알아서
+	OnRequestCompleted.Broadcast(ResponseStruct);
 }
 
 FString UDDHttpApiSubsystem::GetPort()
