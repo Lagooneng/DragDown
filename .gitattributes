@@ -1,1 +1,2 @@
-*.cpp linguist-detectable=true
+Source/** linguist-documentation=false
+Source/** linguist-vendored=false
